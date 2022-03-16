@@ -13,7 +13,7 @@
  * Plugin URI:        https://github.com/cbratschi/github-updater
  * Description:       A plugin to automatically update GitHub, Bitbucket, GitLab, or Gitea hosted plugins, themes, and language packs. It also allows for remote installation of plugins or themes into WordPress.
  * Version:           9.9.11
- * Author:            Andy Fragen
+ * Author:            Andy Fragen, Christoph Bratschi
  * License:           GNU General Public License v2
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.html
  * Domain Path:       /languages
