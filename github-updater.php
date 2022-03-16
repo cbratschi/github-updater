@@ -20,7 +20,7 @@
  * Text Domain:       github-updater
  * Network:           true
  * GitHub Plugin URI: https://github.com/cbratschi/github-updater
- * GitHub Languages:  https://github.com/cbratschi/github-updater-translations
+ * GitHub Languages:  https://github.com/afragen/github-updater-translations
  * Requires at least: 5.2
  * Requires PHP:      7.4
  */
