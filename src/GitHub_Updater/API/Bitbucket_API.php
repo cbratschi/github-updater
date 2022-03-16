@@ -140,6 +140,9 @@ class Bitbucket_API extends API implements API_Interface {
      * @return bool
      */
     public function get_remote_branches() {
+        //debug cbxx
+        error_log('get_remote_branches()');
+
         return $this->get_remote_api_branches( 'bitbucket', '/2.0/repositories/:owner/:repo/refs/branches' );
     }
 
