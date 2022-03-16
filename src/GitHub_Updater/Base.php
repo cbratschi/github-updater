@@ -324,6 +324,9 @@ class Base {
             $language_pack->run();
         }
 
+        //debug cbxx
+        error_log('-> meta done');
+
         return true;
     }
 

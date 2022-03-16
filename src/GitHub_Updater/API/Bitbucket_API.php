@@ -58,7 +58,7 @@ class Bitbucket_API extends API implements API_Interface {
         $this->convert_user_pass_to_token();
 
         //debug cbxx
-        error_log('Bitbucket_API: ' . json_encode($type));
+        error_log('Bitbucket_API: ' . spl_object_hash($this) . ' ' . json_encode($type));
     }
 
     /**
