@@ -141,12 +141,17 @@ class API {
      *                                                   \Fragen\GitHub_Updater\API\Gist_API $repo_api
      */
     public function get_repo_api( $git, $repo = false ) {
+        //debug cbxx
+        error_log('get_repo_api() ' . $git);
+
         $repo_api = null;
         $repo     = $repo ?: new \stdClass();
+
         switch ( $git ) {
             case 'github':
                 $repo_api = new GitHub_API( $repo );
                 break;
+
             case 'bitbucket':
                 if ( ! empty( $repo->enterprise ) ) {
                     $repo_api = new Bitbucket_Server_API( $repo );
@@ -154,12 +159,15 @@ class API {
                     $repo_api = new Bitbucket_API( $repo );
                 }
                 break;
+
             case 'gitlab':
                 $repo_api = new GitLab_API( $repo );
                 break;
+
             case 'gitea':
                 $repo_api = new Gitea_API( $repo );
                 break;
+
             case 'gist':
                 $repo_api = new Gist_API( $repo );
                 break;
@@ -250,6 +258,7 @@ class API {
     private function convert_body_string_to_json( $response ) {
         if ( $this instanceof Gitea_API || $this instanceof Bitbucket_API || $this instanceof Bitbucket_Server_API || $this instanceof Gist_API ) {
             $body = wp_remote_retrieve_body( $response );
+
             if ( null === json_decode( $body ) ) {
                 $response['body'] = json_encode( $body );
             }

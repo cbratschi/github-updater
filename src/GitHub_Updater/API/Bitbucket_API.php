@@ -544,6 +544,9 @@ class Bitbucket_API extends API implements API_Interface {
      * @return mixed $install
      */
     public function remote_install( $headers, $install ) {
+        //debug cbxx
+        error_log('remote_install()');
+
         $bitbucket_org                     = true;
         $options['bitbucket_access_token'] = isset( static::$options['bitbucket_access_token'] ) ? static::$options['bitbucket_access_token'] : null;
 
@@ -571,6 +574,7 @@ class Bitbucket_API extends API implements API_Interface {
                     $install['options']['bitbucket_access_token'] = $install['bitbucket_access_token'];
                 }
             }
+
             if ( $bitbucket_org ) {
                 $token = ! empty( $install['options']['bitbucket_access_token'] )
                 ? $install['options']['bitbucket_access_token']
