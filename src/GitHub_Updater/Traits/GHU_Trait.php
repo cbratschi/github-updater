@@ -749,7 +749,7 @@ trait GHU_Trait {
         if (!$this->type->branches) {
             error_log('branches is null:');
             error_log(json_encode($branch_switch));
-            error_log(json_encode($this->type));
+            error_log(json_encode($this->type)); //cbxx FIXME branches missing!
         }
 
         $is_tag                  = $branch_switch && ! array_key_exists( $branch_switch, $this->type->branches );

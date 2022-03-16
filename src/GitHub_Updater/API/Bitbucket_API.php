@@ -41,6 +41,8 @@ class Bitbucket_API extends API implements API_Interface {
 
         $this->type     = $type;
         $this->response = $this->get_repo_cache();
+
+        //set branch
         $branch         = new Branch( $this->response );
 
         if ( ! empty( $type->branch ) ) {
@@ -54,6 +56,9 @@ class Bitbucket_API extends API implements API_Interface {
         $this->add_install_fields( $this );
         $this->set_credentials_error_message();
         $this->convert_user_pass_to_token();
+
+        //debug cbxx
+        error_log('Bitbucket_API: ' . json_encode($type));
     }
 
     /**
@@ -155,8 +160,10 @@ class Bitbucket_API extends API implements API_Interface {
      * @return string $endpoint
      */
     public function construct_download_link( $branch_switch = false ) {
-        self::$method       = 'download_link';
+        //debug cbxx
+        error_log('construct_download_link() ' . $branch_switch);
 
+        self::$method       = 'download_link';
         $download_link_base = $this->get_api_url( '/:owner/:repo/get/', true );
         $endpoint           = '';
 
@@ -229,6 +236,7 @@ class Bitbucket_API extends API implements API_Interface {
             case 'release_asset':
             case 'download_link':
                 break;
+
             case 'tags':
             case 'branches':
                 $endpoint = add_query_arg(
@@ -239,6 +247,7 @@ class Bitbucket_API extends API implements API_Interface {
                     $endpoint
                 );
                 break;
+
             default:
                 break;
         }

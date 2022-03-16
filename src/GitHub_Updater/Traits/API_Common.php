@@ -38,6 +38,7 @@ trait API_Common {
                 // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
                 $response = isset( $response->content ) ? base64_decode( $response->content ) : $response;
                 break;
+
             case 'bbserver':
                 $response = isset( $response->lines ) ? $this->bbserver_recombine_response( $response ) : $response;
                 break;
@@ -76,6 +77,7 @@ trait API_Common {
         if ( is_wp_error( $response ) ) {
             return null;
         }
+
         switch ( $git ) {
             case 'github':
                 $assets = isset( $response->assets ) ? $response->assets : [];
@@ -87,6 +89,7 @@ trait API_Common {
                 }
                 $response = is_string( $response ) ? $response : null;
                 break;
+
             case 'bitbucket':
                 $download_base = trailingslashit( $this->get_api_url( $request, true ) );
                 $assets        = isset( $response->values ) ? $response->values : [];
@@ -98,12 +101,15 @@ trait API_Common {
                 }
                 $response = is_string( $response ) ? $response : null;
                 break;
+
             case 'bbserver':
                 // TODO: make work.
                 break;
+
             case 'gitlab':
                 $response = $this->get_api_url( $request );
                 break;
+
             case 'gitea':
                 break;
         }
@@ -311,8 +317,14 @@ trait API_Common {
      * @return bool
      */
     public function get_remote_api_branches( $git, $request ) {
+        //debug cbxx
+        error_log('get_remote_api_branches()');
+
         $branches = [];
         $response = $this->response['branches'] ?? false;
+
+        //debug cbxx
+        error_log('Response: ' . json_encode($response));
 
         if ( $this->exit_no_update( $response, true ) ) {
             return false;
@@ -342,7 +354,7 @@ trait API_Common {
             //cbxx does this case happen at all?
         }
 
-        //debug cbxx
+        //debug cbxx -> getting valid value here
         error_log('Branches response 2: ' . json_encode($response));
 
         $this->type->branches = $response;
