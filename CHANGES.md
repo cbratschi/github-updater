@@ -4,7 +4,9 @@
 * fixed WP REST branch issue (PHP 8.0 crash)
 * only load if needed (don't interfere with post rendering)
 * speed up `get_dot_org_data()` by using API 1.2 and `wp_remote_head()`
-* remove branch set from constructor
+* Bitbucket:
+  * remove branch set from constructor
+  * removed old query arg authentication
 * cbxx TODO
 
 #### 9.9.11 / 2022-03-16
