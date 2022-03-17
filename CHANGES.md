@@ -7,7 +7,7 @@
 * Bitbucket:
   * remove branch set from constructor
   * removed old query arg authentication
-* cbxx TODO
+  * ...
 
 #### 9.9.11 / 2022-03-16
 * initial forked repository
