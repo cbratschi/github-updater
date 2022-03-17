@@ -21,12 +21,12 @@
   "repositories": [
     {
       "type": "vcs",
-      "url": "https://github.com/afragen/github-updater"
+      "url": "https://github.com/cbratschi/github-updater"
     }
   ],
   "support": {
-    "issues": "https://github.com/afragen/github-updater/issues",
-    "source": "https://github.com/afragen/github-updater"
+    "issues": "https://github.com/cbratschi/github-updater/issues",
+    "source": "https://github.com/cbratschi/github-updater"
   },
   "minimum-stability": "dev",
   "prefer-stable": true,
