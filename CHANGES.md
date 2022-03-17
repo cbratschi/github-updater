@@ -1,5 +1,13 @@
 #### [unreleased]
 
+#### 9.9.12 / 2022-03-17
+* fixed WP REST branch issue (PHP 8.0 crash)
+* only load if needed (don't interfere with post rendering)
+* cbxx TODO
+
+#### 9.9.11 / 2022-03-16
+* initial forked repository
+
 #### 9.9.10 / 2021-02-18
 * fix change to `redirect_on_save()`
 * fix issue when more than 100 branches are present and primary branch in plugin/theme is changed and not in branches array, thanks @bph
