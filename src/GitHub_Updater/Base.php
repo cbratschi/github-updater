@@ -279,7 +279,7 @@ class Base {
      */
     public function get_remote_repo_meta( $repo ) {
         //debug cbxx
-        error_log('get_remote_repo_meta()');
+        error_log('get_remote_repo_meta() ' . spl_object_hash($this));
 
         // Exit if non-privileged user and bypassing wp-cron.
         if ( apply_filters( 'github_updater_disable_wpcron', false ) && ! Singleton::get_instance( 'Init', $this )->can_update() ) {

@@ -747,7 +747,7 @@ trait GHU_Trait {
         //cbxx FIXME Uncaught TypeError: array_key_exists(): Argument #2 ($array) must be of type array, null given
         //cbxx FIXME PHP 8.0 crash
         if (!$this->type->branches) {
-            error_log('branches is null:' . spl_object_hash($this));
+            error_log('branches is null: ' . spl_object_hash($this));
             error_log(json_encode($branch_switch));
             error_log(json_encode($this->type)); //cbxx FIXME branches missing!
         }
