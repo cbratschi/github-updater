@@ -1,5 +1,7 @@
 ![GitHub Updater](./assets/GitHub_Updater_logo_small.png)
 
+This is a fork of GitHub Updater 9.9.10 with features backported from more recent version and custom changes done by [Christoph Bratschi](https://github.com/cbratschi).
+
 # GitHub Updater
 
 ![downloads](https://img.shields.io/github/downloads/afragen/github-updater/total) ![downloads@latest](https://img.shields.io/github/downloads/afragen/github-updater/latest/total)
