@@ -57,8 +57,8 @@ class Bitbucket_API extends API implements API_Interface {
         $this->set_credentials_error_message();
         $this->convert_user_pass_to_token();
 
-        //debug cbxx
-        error_log('Bitbucket_API: ' . spl_object_hash($this) . ' ' . json_encode($type));
+        //debug
+        //error_log('Bitbucket_API: ' . spl_object_hash($this) . ' ' . json_encode($type));
     }
 
     /**
@@ -140,8 +140,8 @@ class Bitbucket_API extends API implements API_Interface {
      * @return bool
      */
     public function get_remote_branches() {
-        //debug cbxx
-        error_log('get_remote_branches()');
+        //debug
+        //error_log('get_remote_branches()');
 
         return $this->get_remote_api_branches( 'bitbucket', '/2.0/repositories/:owner/:repo/refs/branches' );
     }
@@ -163,8 +163,8 @@ class Bitbucket_API extends API implements API_Interface {
      * @return string $endpoint
      */
     public function construct_download_link( $branch_switch = false ) {
-        //debug cbxx
-        error_log('construct_download_link() ' . $branch_switch);
+        //debug
+        //error_log('construct_download_link() ' . $branch_switch);
 
         self::$method       = 'download_link';
         $download_link_base = $this->get_api_url( '/:owner/:repo/get/', true );
@@ -544,8 +544,8 @@ class Bitbucket_API extends API implements API_Interface {
      * @return mixed $install
      */
     public function remote_install( $headers, $install ) {
-        //debug cbxx
-        error_log('remote_install()');
+        //debug
+        //error_log('remote_install()');
 
         $bitbucket_org                     = true;
         $options['bitbucket_access_token'] = isset( static::$options['bitbucket_access_token'] ) ? static::$options['bitbucket_access_token'] : null;

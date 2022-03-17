@@ -744,14 +744,6 @@ trait GHU_Trait {
      * @return bool
      */
     public function use_release_asset( $branch_switch = false ) {
-        //cbxx FIXME Uncaught TypeError: array_key_exists(): Argument #2 ($array) must be of type array, null given
-        //cbxx FIXME PHP 8.0 crash
-        if (!$this->type->branches) {
-            error_log('branches is null: ' . spl_object_hash($this));
-            error_log(json_encode($branch_switch));
-            error_log(json_encode($this->type)); //cbxx FIXME branches missing!
-        }
-
         $is_tag                  = $branch_switch && ! array_key_exists( $branch_switch, $this->type->branches );
         $switch_master_tag       = $this->type->primary_branch === $branch_switch || $is_tag;
         $current_master_noswitch = $this->type->primary_branch === $this->type->branch && false === $branch_switch;

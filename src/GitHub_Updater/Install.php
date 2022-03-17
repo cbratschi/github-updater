@@ -147,8 +147,8 @@ class Install {
      * @return bool
      */
     public function install( $type, $config = null ) {
-        //debug cbxx
-        error_log('install()');
+        //debug
+        //error_log('install()');
 
         if ( self::is_wp_cli() ) {
             $this->set_install_post_data( $config );

@@ -126,7 +126,6 @@ class Init {
 
         // WP REST API has full capabilities.
         //@appamics.CB: added REST API
-        //cbxx TODO verify
         if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
             return true;
         }

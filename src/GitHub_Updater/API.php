@@ -141,8 +141,8 @@ class API {
      *                                                   \Fragen\GitHub_Updater\API\Gist_API $repo_api
      */
     public function get_repo_api( $git, $repo = false ) {
-        //debug cbxx
-        error_log('get_repo_api() ' . $git);
+        //debug
+        //error_log('get_repo_api() ' . $git);
 
         $repo_api = null;
         $repo     = $repo ?: new \stdClass();
@@ -204,7 +204,7 @@ class API {
         $url           = $this->get_api_url( $url );
         $auth_header   = $this->add_auth_header( [], $url );
         $type          = $this->return_repo_type();
-        $response      = wp_remote_get( $url, array_merge( $this->default_http_get_args, $auth_header ) );
+        $response      = $this->remote_get( $url, array_merge( $this->default_http_get_args, $auth_header ) );
         $code          = (int) wp_remote_retrieve_response_code( $response );
         $allowed_codes = [ 200, 404 ];
 
@@ -213,6 +213,7 @@ class API {
 
             return $response;
         }
+
         if ( ! in_array( $code, $allowed_codes, true ) ) {
             static::$error_code = array_merge(
                 static::$error_code,
@@ -225,9 +226,11 @@ class API {
                     ],
                 ]
             );
+
             if ( in_array( $type['git'], [ 'github', 'gist' ], true ) ) {
                 GitHub_API::ratelimit_reset( $response, $this->type->slug );
             }
+
             Singleton::get_instance( 'Messages', $this )->create_error_message( $type['git'] );
 
             if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
@@ -235,7 +238,7 @@ class API {
 
                 if ( null !== $response_body && \property_exists( $response_body, 'message' ) ) {
                     $log_message = "GitHub Updater Error: {$this->type->name} ({$this->type->slug}) - {$response_body->message}";
-                // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+                    // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
                     error_log( $log_message );
                 }
             }
@@ -247,6 +250,18 @@ class API {
         $response = $this->convert_body_string_to_json( $response );
 
         return json_decode( wp_remote_retrieve_body( $response ) );
+    }
+
+    /**
+     * Perform a HTTP get operation.
+     */
+    private function remote_get( $url, $args = [] ) {
+        $response = wp_remote_get( $url, $args );
+
+        //debug cbxx
+        error_log('-> get ' . $url);
+
+        return $response;
     }
 
     /**
@@ -426,7 +441,7 @@ class API {
                 ],
                 $url
             );
-            $response = wp_remote_get( $url );
+            $response = $this->remote_get( $url );
 
             if ( is_wp_error( $response ) ) {
                 Singleton::get_instance( 'Messages', $this )->create_error_message( $response );
@@ -664,10 +679,12 @@ class API {
         // phpcs:ignore WordPress.Security.NonceVerification
         if ( ! $response || isset( $_REQUEST['override'] ) ) {
             add_action( 'requests-requests.before_redirect', [ $this, 'set_redirect' ], 10, 1 );
+
             $auth_header     = $this->add_auth_header( [], $asset );
             $octet_stream    = [ 'accept' => 'application/octet-stream' ];
             $args['headers'] = array_merge( $auth_header['headers'], $octet_stream );
-            wp_remote_get( $asset, $args );
+
+            $this->remote_get( $asset, $args );
         }
 
         if ( ! empty( $this->redirect ) ) {

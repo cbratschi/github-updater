@@ -317,14 +317,14 @@ trait API_Common {
      * @return bool
      */
     public function get_remote_api_branches( $git, $request ) {
-        //debug cbxx
-        error_log('get_remote_api_branches()');
+        //debug
+        //error_log('get_remote_api_branches()');
 
         $branches = [];
         $response = $this->response['branches'] ?? false;
 
-        //debug cbxx
-        error_log('Response: ' . json_encode($response));
+        //debug
+        //error_log('Response: ' . json_encode($response));
 
         if ( $this->exit_no_update( $response, true ) ) {
             return false;
@@ -340,22 +340,15 @@ trait API_Common {
                 return false;
             }
 
-            //debug cbxx
-            error_log('Branches response:' . json_encode($response));
+            //debug
+            //error_log('Branches response:' . json_encode($response));
 
-            if ( $response ) {
-                $branches             = $this->parse_branch_response( $response );
-                $this->type->branches = $branches;
-                $this->set_repo_cache( 'branches', $branches );
+            $branches             = $this->parse_branch_response( $response );
+            $this->type->branches = $branches;
+            $this->set_repo_cache( 'branches', $branches );
 
-                return true;
-            }
-
-            //cbxx does this case happen at all?
+            return true;
         }
-
-        //debug cbxx -> getting valid value here
-        error_log('Branches response 2: ' . json_encode($response));
 
         $this->type->branches = $response;
 

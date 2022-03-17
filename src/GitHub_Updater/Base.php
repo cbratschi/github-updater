@@ -278,16 +278,16 @@ class Base {
      * @return bool
      */
     public function get_remote_repo_meta( $repo ) {
-        //debug cbxx
-        error_log('get_remote_repo_meta() ' . spl_object_hash($this));
+        //debug
+        //error_log('get_remote_repo_meta() ' . spl_object_hash($this));
 
         // Exit if non-privileged user and bypassing wp-cron.
         if ( apply_filters( 'github_updater_disable_wpcron', false ) && ! Singleton::get_instance( 'Init', $this )->can_update() ) {
             return;
         }
 
-        //debug cbxx
-        error_log('-> get data');
+        //debug
+        //error_log('-> get data');
 
         $file = 'style.css';
         if ( false !== stripos( $repo->type, 'plugin' ) ) {
@@ -324,8 +324,8 @@ class Base {
             $language_pack->run();
         }
 
-        //debug cbxx
-        error_log('-> meta done');
+        //debug
+        //error_log('-> meta done');
 
         return true;
     }

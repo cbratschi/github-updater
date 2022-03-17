@@ -143,8 +143,8 @@ class Rest_Update {
      * @throws \UnexpectedValueException Theme not found or not updatable.
      */
     public function update_theme( $theme_slug, $tag = 'master' ) {
-        //debug cbxx
-        error_log('update_theme() ' . $theme_slug . ' ' . $tag);
+        //debug
+        //error_log('update_theme() ' . $theme_slug . ' ' . $tag);
 
         $theme = null;
 
@@ -189,8 +189,8 @@ class Rest_Update {
         // Add authentication header to download package.
         add_filter( 'http_request_args', [ Singleton::get_instance( 'API', $this ), 'download_package' ], 15, 2 );
 
-        //debug cbxx
-        error_log('-> create Theme_Upgrader');
+        //debug
+        //error_log('-> create Theme_Upgrader');
 
         $upgrader = new \Theme_Upgrader( $this->upgrader_skin );
         $upgrader->upgrade( $theme->slug );
