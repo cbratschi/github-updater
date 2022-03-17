@@ -3,7 +3,7 @@
 #### 9.9.12 / 2022-03-17
 * fixed WP REST branch issue (PHP 8.0 crash)
 * only load if needed (don't interfere with post rendering)
-* cbxx TODO
+* speed up `get_dot_org_data()` by using API 1.2 and `wp_remote_head()`
 
 #### 9.9.11 / 2022-03-16
 * initial forked repository
