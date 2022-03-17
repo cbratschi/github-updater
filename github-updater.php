@@ -42,6 +42,8 @@ if ( ! $ghu_needed ) {
     //debug cbxx
     if (function_exists( 'ap_debug' )) {
         ap_debug( 'GHU not needed.' );
+    } else {
+        error_log( 'GHU not needed. ' . $_SERVER[ 'REQUEST_URI' ] );
     }
 
     //skip
