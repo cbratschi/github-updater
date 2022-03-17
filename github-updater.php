@@ -35,8 +35,8 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
-// Check screen.
-$ghu_needed = is_admin() || (defined( 'REST_REQUEST' ) && REST_REQUEST ) || (defined( 'WP_CLI' ) && \WP_CLI);
+// Check environment.
+$ghu_needed = is_admin() || ( strpos($_SERVER[ 'REQUEST_URI' ], '/wp-json/github-updater/') !== false ) || (defined( 'WP_CLI' ) && \WP_CLI);
 
 if ( ! $ghu_needed ) {
     //debug cbxx
