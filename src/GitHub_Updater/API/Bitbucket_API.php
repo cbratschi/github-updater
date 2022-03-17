@@ -12,7 +12,6 @@ namespace Fragen\GitHub_Updater\API;
 
 use Fragen\Singleton;
 use Fragen\GitHub_Updater\API;
-use Fragen\GitHub_Updater\Branch;
 
 /*
  * Exit if called directly.
@@ -41,15 +40,6 @@ class Bitbucket_API extends API implements API_Interface {
 
         $this->type     = $type;
         $this->response = $this->get_repo_cache();
-
-        //set branch
-        $branch         = new Branch( $this->response );
-
-        if ( ! empty( $type->branch ) ) {
-            $this->type->branch = ! empty( $branch->cache['current_branch'] )
-                ? $branch->cache['current_branch']
-                : $type->branch;
-        }
 
         $this->settings_hook( $this );
         $this->add_settings_subtab();
