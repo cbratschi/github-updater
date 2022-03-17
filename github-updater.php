@@ -35,6 +35,19 @@ if ( ! defined( 'WPINC' ) ) {
     die;
 }
 
+// Check screen.
+$ghu_needed = is_admin() || (defined( 'REST_REQUEST' ) && REST_REQUEST ) || (defined( 'WP_CLI' ) && \WP_CLI);
+
+if ( ! $ghu_needed ) {
+    //debug cbxx
+    if (function_exists( 'ap_debug' )) {
+        ap_debug( 'GHU not needed.' );
+    }
+
+    //skip
+    return;
+}
+
 // Load the Composer autoloader.
 if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
     require __DIR__ . '/vendor/autoload.php';
@@ -43,7 +56,9 @@ if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
 // Check for composer autoloader.
 if ( ! class_exists( 'Fragen\GitHub_Updater\Bootstrap' ) ) {
     require_once __DIR__ . '/src/GitHub_Updater/Bootstrap.php';
+
     ( new Bootstrap( __FILE__ ) )->deactivate_die();
 }
 
+// Load plugin.
 ( new Bootstrap( __FILE__ ) )->run();

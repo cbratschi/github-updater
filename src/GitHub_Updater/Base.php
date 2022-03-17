@@ -133,7 +133,7 @@ class Base {
     }
 
     /**
-     * Load Plugin, Theme, and Settings with correct capabiltiies and on selective admin pages.
+     * Load Plugin, Theme, and Settings with correct capabilities and on selective admin pages.
      *
      * @return bool
      */
