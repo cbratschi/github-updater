@@ -1,6 +1,11 @@
 #### [unreleased]
 
+#### 9.9.13 / 2022-07-04
+
+* deactivated debug code
+
 #### 9.9.12 / 2022-03-17
+
 * fixed WP REST branch issue (PHP 8.0 crash)
 * only load if needed (don't interfere with post rendering)
 * speed up `get_dot_org_data()` by using API 1.2 and `wp_remote_head()`
@@ -10,29 +15,36 @@
   * ...
 
 #### 9.9.11 / 2022-03-16
+
 * initial forked repository
 
 #### 9.9.10 / 2021-02-18
+
 * fix change to `redirect_on_save()`
 * fix issue when more than 100 branches are present and primary branch in plugin/theme is changed and not in branches array, thanks @bph
 
 #### 9.9.9 / 2021-02-17
+
 * update for WP 5.7 CSS changes
 * update for setting branch on rollback
 * add `shields.io` download stats to README
 * add compatibility with [Skip Updates](https://wordpress.org/plugins/skip-updates)
 
 #### 9.9.8 / 2021-02-01
+
 * fix odd return from Gitea API branch request
 * update for new URL to GitHub release asset redirect, fixes [#929](https://github.com/afragen/github-updater/issues/929)
 
 #### 9.9.7 / 2021-01-11
+
 * fix PHP8 error in `set_branch_on_switch()`, [#925](https://github.com/afragen/github-updater/issues/925)
 
 #### 9.9.6 / 2021-01-08
+
 * this fix for odd log errors, hopefully, doesn't create new errors
 
 #### 9.9.5 / 2021-01-07
+
 * fix odd error I see in the logs
 * use GitHub Actions for CI
 * fix some docBlock settings
@@ -41,6 +53,7 @@
 * update some composer resources
 
 #### 9.9.4 / 2020-11-21
+
 * update to latest `class-parser.php` and `Readme_Parser` cleanup
 * extra testing to remove `@` ( silencing )
 * update `ghu-loader.php`
@@ -48,27 +61,33 @@
 * added `Gist_API` and `Language_Pack_API` to `Basic_Auth_Loader`, oops
 
 #### 9.9.3 / 2020-11-04
+
 * update `class-parser.php`, now allows for sending text blob as input, thanks @dd32
 * no longer need to use data URLs as potential security risk [#909](https://github.com/afragen/github-updater/issues/909)
 
 #### 9.9.2 / 2020-11-03
+
 * add filter to modify release asset rollback, 🖕 Gutenberg
 * fixed logic in `github_updater_no_release_asset_branches`
 
 #### 9.9.1 / 2020-11-03
+
 * use data URL in `Readme_Parser` instead of creating/deleting temp file
 * add filter `github_updater_no_release_asset_branches` to remove all branches from the branch switcher for release assets leaving only the tags
 
 #### 9.9.0 / 2020-10-05
+
 * refactor of branch switch row by @pbiron, looks fabulous!!
 * test for existence of `$token->newest_tag` in `REST_API` or error may result
 * update to allow for multiple release assets but then only use release asset named per schema, `$repo-$tag.zip`
 * make branch switch message for 'no tags' rollback message as list item
 
 #### 9.8.1 / 2020-08-06
+
 * update `Themes` to populate `$transient->no_update` for Auto-updates link
 
 #### 9.8.0 / 2020-08-01
+
 * `permission_callback` arg to `register_rest_route()` as this is now [required](https://core.trac.wordpress.org/changeset/48526)
 * fix error in `move()` if directory doesn't exist
 * revert to `$wp_filesystem->move()` when not FS_METHOD === 'direct'
@@ -76,9 +95,11 @@
 * add a few additional items to the update packages
 
 #### 9.7.1 / 2020-07-20
+
 * correctly set Bypass WP-Cron Background Processing checkbox if filter set elsewhere
 
 #### 9.7.0 / 2020-07-09
+
 * use _dynamic_ constant for GitHub Updater plugin directory based on namespace
 * update to use `Languages` header as base for language pack packages, this should allow for self-hosted git servers
 * add header `Primary Branch` for those devs looking to replace `master`
@@ -87,26 +108,31 @@
 * update composer dependencies
 
 #### 9.6.1 / 2020-06-11
+
 * exit early from `Gist_API::construct_download_link()` if meta not present
 * fix saved value when `Bitbucket_Server_API` tag response is empty
 * fix issue if Bitbucket API branch response is malformed, fixes [#875](https://github.com/afragen/github-updater/issues/875)
 * fix PHP warning in `GHU_Trait::is_duplicate_wp_cron_event` when no cron events present
 
 #### 9.6.0 / 2020-06-01
+
 * add WP-CLI branch switching
 * keep _Activate Plugin_ link on remote install
 * add `class Gist_API` to install/update GitHub Gists, themes will use hash as slug
 * add filter `github_updater_number_rollbacks` to set the number of tagged releases (rollbacks) available in branch switching
 
 #### 9.5.2 / 2020-05-09
+
 * no need for using release asset with GHU
 
 #### 9.5.1 / 2020-05-09
+
 * test `Readme_Parser::__construct()` `file_put_contents()` with additional test for success, hopefully squashes [#704](https://github.com/afragen/github-updater/issues/704) once and for all, actual fix is to set constant `WP_TEMP_DIR` as appropriate
 * prevent error if no credentials are set
 * un-screwup Bitbucket Server, sorry @allrite, fixes [#872](https://github.com/afragen/github-updater/issues/872)
 
 #### 9.5.0 / 2020-04-17
+
 * allow for repos using release assets to have branch switcher
 * switching away from `master` or tag will use that branch for updating, not the release asset
 * update to JS to work with IE11, thanks @sharevb, arrow functions not supported in IE11
@@ -117,12 +143,15 @@
 * limit rollback to current tag only, effectively a re-install of current tag
 
 #### 9.4.2 / 2020-04-10 -HotFix 2-
+
 * fixed problem with incorrectly sanitizing remote install URI fragment
 
 #### 9.4.1 / 2020-04-04 -HotFix-
+
 * fixed problem with sanitizing
 
 #### 9.4.0 / 2020-04-04
+
 * set `minimum-stability: dev` in composer.json, helps with dependency loading for `dev-master`
 * fix potential PHP warning in `Basic_Auth_Loader::get_slug_for_credentials()` when installer, like TGMPA, passes as array and not string
 * define `$error_code[{git}]['git']` for certain errors to avoid PHP undefined index warning
@@ -139,15 +168,18 @@
 * added dependency check for composer's autoloader
 
 #### 9.3.2 / 2020-02-19
+
 * fixed some PHP warnings and 401 errors when access tokens not set in `Basic_Auth_Loader`
 * allow URL to a git host API to add header during installation
 * removed saving and use of Enterprise Access Tokens, must use individual repo tokens
 * use `PRIVATE-TOKEN: <token>` header for authentication in GitLab < v12.2
 
 #### 9.3.1 / 2020-02-09
+
 * try to ensure authentication headers aren't injected where they shouldn't be, bad Andy 🤦‍♂️
 
 #### 9.3.0 / 2020-02-06
+
 * remove GitHub deprecation notice
 * transition from GitHub access token query arg to Basic Authentication
 * fixed theme update View details display [#849](https://github.com/afragen/github-updater/issues/849)
@@ -155,19 +187,24 @@
 * refactor from using access token endpoints to Basic Authentication headers
 
 #### 9.2.4 / 2020-02-04
+
 * add notice re: GitHub deprecation notice 🤬
 
 #### 9.2.3 / 2020-01-31
+
 * fixes for PHP 7.4 warnings
 
 #### 9.2.2 / 2020-01-29
+
 * fix WP-CLI issue needing to explicitly have class loaded to get class name for `add_command()`, thanks @chesio
 * bunch of WPCS fixes and miles to go...
 
 #### 9.2.1 / 2020-01-28
+
 * add `Bypass WP-Cron Background Processing` setting
 
 #### 9.2.0 / 2020-01-21
+
 * fix PHP warning [#823](https://github.com/afragen/github-updater/issues/823), thanks @pbiron
 * remove scheduled cron events on deactivation
 * added function to rename or recursively copy from `$source` to `$destination` and remove files/directories after copying. Should be more versatile than `$wp_filesystem->move()`. Fixes [#826](https://github.com/afragen/github-updater/issues/826)
@@ -177,14 +214,17 @@
 * remove `repos` and `update` REST endpoints from index, thanks @Raruto
 
 #### 9.1.0 / 2019-12-16
+
 * run API calls for everyone with wp-cron, not just privileged users, hopefully this allows for better integration with remote management services
 * don't run API calls for non-privileged users when bypassing wp-cron
 * only show Settings for privileged users
 
 #### 9.0.1 / 2019-12-04
+
 * fix PHP version check, fixes [#824](https://github.com/afragen/github-updater/issues/824)
 
 #### 9.0.0 / 2019-11-19
+
 * refactor to remove class extends
 * update renaming functions
 * refactor to how plugin and theme meta are obtained, now using `get_file_data()`
@@ -197,28 +237,33 @@
 * support WP core `Requires at least` header in favor of `Requires WP` header
 
 #### 8.9.0 / 2019-09-30
-* update all instances of `WP_Upgrader_Skin` to include new spread operator, https://core.trac.wordpress.org/changeset/46125
+
+* update all instances of `WP_Upgrader_Skin` to include new spread operator, <https://core.trac.wordpress.org/changeset/46125>
 * update URI parsing to allow for `.` in repository name while still removing `.git`. Thanks @ymauray for the nudge
 * make downloadable JSON config files to work with [Git Bulk Updater](https://github.com/afragen/git-bulk-updater)
 * fix multisite saving of Remote Management settings
 
 #### 8.8.2 / 2019-07-02
+
 * added check for `Basic_Auth_Loader::get_credentials()` to match `$slug` and `$git`, fixes edge case [#796](https://github.com/afragen/github-updater/issues/796)
 * refactored `Basic_Auth_Loader::get_credentials()` to split out `Basic_Auth_Loader::get_slug_for_credentials()` and `Basic_Auth_Loader::get_type_for_credentials()`
 * created more precise adding and removing `Basic_Auth_Loader` hooks
 * fixed `Bitbucket_API` return when no tags found
 
 #### 8.8.1 / 2019-06-11
+
 * set `homepage` to `PluginURI` or `ThemeURI`, fixes [#791](https://github.com/afragen/github-updater/issues/791)
 * fixed Bitbucket release asset updates for proper containing folder structure, thanks @benoitchantre for the bug report
 
 #### 8.8.0 / 2019-05-15
+
 * switched from `pre_set_site_transient_update_{plugins|themes}` to `site_transient_update_{plugins|themes}`
 * update `Remote_Management` to work with filter change
 * update `CLI_Integration` to work with filter change
 * use `GITHUB_UPDATER_DIR` constant for all enqueuing
 
 #### 8.7.3 / 2019-04-08
+
 * fixed PHP notices on Install [#775](https://github.com/afragen/github-updater/issues/775)
 * updated location of `tmp-readme.txt` file to use `get_temp_dir()`, thanks @DavidAnderson684
 * a11y updates for `label for=...`
@@ -227,9 +272,11 @@
 * remove filter for `http_request_args` after use, fixes [#783](https://github.com/afragen/github-updater/issues/783)
 
 #### 8.7.2 / 2019-03-09
+
 * hotfix to add parity for themes and prevent PHP warning
 
 #### 8.7.1 / 2019-03-09
+
 * add new filter hook `github_updater_post_construct_download_link` to allow for returning your own download link
 * deprecate filter hook `github_updater_set_rollback_package` as the above replaces it
 * add _looser_ check of `Base::get_repo_slugs()`, thanks @sc0ttkclark
@@ -237,6 +284,7 @@
 * added filter hook `github_updater_repo_cache_timeout` to change default timeout per repository, thanks @sc0ttkclark
 
 #### 8.7.0 / 2019-02-24
+
 * update `Readme_Parser` for changelog and description parsing
 * add filter `github_updater_temp_readme_filepath` to change default location if server has permissions issues, fixes [#766](https://github.com/afragen/github-updater/issues/766)
 * fix `Readme_Parser` to use `version_compare()` when checking compatibility with `create_contributors()`
@@ -244,12 +292,15 @@
 * add filter `github_updater_remote_is_newer` to use your own version comparison function
 
 #### 8.6.3 / 2019-02-04
+
 * use Update PHP messaging as in WP 5.1 in version check
 
 #### 8.6.2 / 2019-01-14
+
 * fix for bug with Bitbucket endpoints, fixes [#757](https://github.com/afragen/github-updater/issues/757)
 
 #### 8.6.1 / 2019-01-11
+
 * remove `tmp-readme.txt` after parsing, fixes [#754](https://github.com/afragen/github-updater/issues/754)
 * directly call `wp_cron()` after refreshing cache
 * update POT via `composer.json` and wp-cli
@@ -258,19 +309,23 @@
 * add endpoint to Bitbucket to get more than default number of tags, branches, or release assets. Fixes [#752](https://github.com/afragen/github-updater/issues/752) thanks @idpaterson
 
 #### 8.6.0 / 2018-12-28 🎂
+
 * add action hook `github_updater_post_rest_process_request` for @Raruto
 * add filter hook `github_updater_set_rollback_package` for @sc0ttclark and @moderntribe
 * return null for `API_Common::parse_release_asset()` when invalid `$response`, fixes [#750](https://github.com/afragen/github-updater/issues/750)
 * make GitHub private repos with release assets use redirect for download link, fixes [#751](https://github.com/afragen/github-updater/issues/751)
 
 #### 8.5.2 / 2018-12-10
+
 * fixed parsing of wp.org readme changelog items
 
 #### 8.5.1 / 2018-11-30
+
 * refactor release asset API calls to `trait API_Common`
 * updated GitLab API v4 endpoints, thanks for all the notice GitLab 😩
 
 #### 8.5.0 / 2018-11-26
+
 * silence rename PHP warning during plugin update
 * specify branch for changelog
 * refactored dot org override, constant deprecated in favor of new filter `github_updater_override_dot_org`
@@ -282,13 +337,16 @@
 * updated to add/use composer dependencies and autoloader
 
 #### 8.4.2 / 2018-11-01
+
 * updated password fields to not autoload saved passwords, thanks @figureone
 * fixed error when saving Remote Management options
 
 #### 8.4.1 / 2018-10-24
+
 * updated PAnD library with `forever` fix, this was my fault 💩
 
 #### 8.4.0 / 2018-10-23
+
 * use new constant for assets
 * update error checking for `WP_Error` response from `wp_remote_get()`
 * updated to use Bitbucket API 2.0 where appropriate
@@ -304,10 +362,12 @@
 * update Persist Admin notices Dismissal library
 
 #### 8.3.1 / 2018-09-13
+
 * created `class Bootstrap` to setup plugin loading
 * fixed issue with `load_plugin_textdomain()` not loading completely (now loading in `init` hook), thanks @pnoeric and @garrett-eclipse
 
 #### 8.3.0 / 2018-09-12
+
 * test to ensure `file_put_contents()` works
 * overwrite `tmp-readme.txt` instead of delete
 * delete `tmp-readme.txt` on uninstall
@@ -326,26 +386,33 @@
 * use WPCS 1.1.0
 
 #### 8.2.1 / 2018-07-22
+
 * fixed setting of `Requires PHP` header in `API::set_readme_info()`
 
 #### 8.2.0 / 2018-07-15
+
 * fixed `register_activation_hook` to add the `develop` branch if that is the source
 * refactored `class Readme_Parser` to use unmodified `vendor/class-parser.php`
 * add `Requires PHP` info to _More Detail_ window
 
 #### 8.1.2 / 2018-06-28
+
 * fixed malformed link tag, thanks @alexclassroom
 * updated POT
 
 #### 8.1.1 / 2018-06-27
+
 * updated GitLab CE/Enterprise to use GitLab API v4
 * urlencode part of request to dot org API to avoid redirect
 
 #### 8.1.0 / 2018-06-26
+
 * added `register_activation_hook` to correctly rename directory to `github-updater` on activation; activation will fail if rename successful.
 
 #### 8.0.0 / 2018-06-20
+
 ##### This update requires PHP 5.6 or greater
+
 * added multiple action/filter hooks for adding data to Settings
 * refactored `Settings` to add data via hooks
 * refactored `class Basic_Auth_Loader` to `trait Basic_Auth_Loader`
@@ -367,14 +434,17 @@
 * updated `GitLab_API` for API v4
 
 #### 7.6.2 / 2018-04-27
+
 * move `auth_required` stuff from `Base` to `Settings`
 * prevent admin notice from showing when no GitLab.com repo exists
 * remove caching of `get_plugins()` and `wp_get_themes()` as it seems to result in issues for some users
 
 #### 7.6.1 / 2018-04-11
+
 * check `file_exists()` in `Base::set_installed_apis()` to avoid issue if class not yet loaded prior to checking Settings, fixes [#662](https://github.com/afragen/github-updater/issues/662) and [#667](https://github.com/afragen/github-updater/issues/667)
 
 #### 7.6.0 / 2018-04-08
+
 * added "safety orange" warning dashicon when waiting for WP-Cron to finish
 * changed all password fields to use `type="password"`
 * refactored setting of contributor data for [r42631](https://core.trac.wordpress.org/changeset/42631)
@@ -390,6 +460,7 @@
 * added error logging to RESTful update code as sometimes GitLab.com seems to timeout the response, thanks @Raruto
 
 #### 7.5.0 / 2018-01-28
+
 * fixed _View detail_ ratings for large projects with lots of issues
 * fixed `API::set_readme_info()` to see passed parameter as readme data
 * added title attribute to icons on Settings subtabs, thanks @petemolinero
@@ -406,21 +477,26 @@
 * fixed `composer.json` for new license format
 
 #### 7.4.4 / 2017-11-29
+
 * fixed bug in remote install where Bitbucket credentials weren't transferred to Basic_Auth_Loader, [#630](https://github.com/afragen/github-updater/issues/630)
 
 #### 7.4.3 / 2017-11-07
+
 * set all extra header values in `Base::parse_extra_headers()`
 * added more error messaging for `class WP_Error`
 * fixed some issues with GitHub Release Assets
 
 #### 7.4.2 / 2017-10-25
+
 * added check to see if wp-cron is updating and if not send and error message
 * fix for WP-CLI updating for private Bitbucket repos, thanks @v8-ict
 
 #### 7.4.1 / 2017-10-22
+
 * oops, during refactor of `Install` I copied the incorrect query for GitHub's remote install
 
 #### 7.4.0 / 2017-10-21
+
 * use wp-cron for background processing of `wp_remote_get()` calls for getting repo data 🚀
 * fixed [#603](https://github.com/afragen/github-updater/issues/603) by not creating generic global variables accidentally
 * fixed issue with remote install of private Bitbucket repos
@@ -432,9 +508,11 @@
 * fixed removal of stale options
 
 #### 7.3.1 / 2017-09-20
+
 * removed parent constructor from `Branch`, thanks @fwolfst
 
 #### 7.3.0 / 2017-09-15
+
 * removed non-constructor stuff from all constructors
 * added `parent::__construct()` to extended classes where needed
 * fixed [#568](https://github.com/afragen/github-updater/issues/586), thanks @bradmkjr
@@ -444,6 +522,7 @@
 * fixed issues with _up to date_ notice during branch switch [#598](https://github.com/afragen/github-updater/issues/598)
 
 #### 7.2.0 / 2017-08-30
+
 * added a static proxy class to use for creating Singletons
 * fixed Override Dot Org for themes
 * fixed PHP Notice [#584](https://github.com/afragen/github-updater/issues/584)
@@ -452,6 +531,7 @@
 * fixed branch setting bug [#592](https://github.com/afragen/github-updater/issues/592) by moving trigger from filter hook to direct call, thanks @rob and @idpaterson
 
 #### 7.1.0 / 2017-08-10
+
 * always show _Install_ button for single site theme when branch switch is active [#567](https://github.com/afragen/github-updater/issues/567)
 * fixed override of dot org to correctly ignore dot org updates [#581](https://github.com/afragen/github-updater/issues/581)
 * no more extended naming
@@ -459,6 +539,7 @@
 * added Overriding Dot Org functions for both plugins and themes
 
 #### 7.0.0 / 2017-08-01
+
 * added support for GitLab Groups [#556](https://github.com/afragen/github-updater/issues/556), thanks @rolandsaven
 * refactored Settings and Install to place API Settings data in individual API classes
 * refactored Settings to make smaller methods
@@ -468,26 +549,32 @@
 * created `class Branch` to automatically set correct branch during branch switch or install. No more need for Branch header. This is a breaking change as `master` will become the default branch for all repositories. You will need to use _Branch Switch_ to reinstall the current branch for it to be correctly set.
 
 #### 6.3.5 / 2017-06-29
+
 * hotfix to `composer.json` to remove classmap and files, I think I messed something up.
 
 #### 6.3.4 / 2017-05-28
+
 * fixed [#547](https://github.com/afragen/github-updater/issues/547) for RESTful updating after breaking it again
 * fixed PHP errors [#550](https://github.com/afragen/github-updater/issues/550)
 
 #### 6.3.3 / 2017-05-16
+
 * definitive fix for [#549](https://github.com/afragen/github-updater/issues/549)
 * update to `class-parser.php@5483`
 
 #### 6.3.2 / 2017-05-09
+
 * added _broken_ setting to repo not returning HTTP 200 for the main file
 * ~~fixed PHP error [#549](https://github.com/afragen/github-updater/issues/549)~~
 * added div class to Settings page to create more specific CSS selectors
 
 #### 6.3.1 / 2017-05-01
+
 * simplify uninstall.php
 * ensure Basic Auth headers are loaded for RESTful updating [#547](https://github.com/afragen/github-updater/issues/547)
 
 #### 6.3.0 / 2017-04-26
+
 * fixed to not run `load_pre_filters()` during WP-CLI, fixes [#528](https://github.com/afragen/github-updater/issues/528) thanks @egifford
 * hopefully fixed annoying, intermittent PHP notices empty `parse_header_uri()` output
 * added a singleton to `class Settings` to avoid duplicate loads [#531](https://github.com/afragen/github-updater/issues/531)
@@ -510,6 +597,7 @@
 * add red (#f00) warning dashicon in Settings for repo with malformed header URI
 
 #### 6.2.2 / 2017-02-09
+
 * fixed for updating via webhook from GitHub tagged release, declare branch as `master`
 * refactored Install download link generation
 * fixed PHP notices [#525](https://github.com/afragen/github-updater/issues/525)
@@ -519,10 +607,12 @@
 * fixed GitLab Settings to show individual access tokens
 
 #### 6.2.1 / 2017-02-02
+
 * removed `wp_cache_flush()` for Install page, not needed with `Base::admin_pages_update_transients()`
 * hotfix for upgrade routine to properly flush caches :P
 
 #### 6.2.0 / 2017-02-02
+
 * added WP-CLI compatibility
 * refactored `Base::admin_pages_update_transient()` and `API::wp_update_response()` to use `Base::make_update_transient_current()`, this fixed some PHP notices [#508](https://github.com/afragen/github-updater/issues/508)
 * added banner display to plugin `View details` iframe
@@ -537,9 +627,11 @@
 * updated continuous integration via RESTful endpoints to also update based upon a new tag/release of the repo
 
 #### 6.1.1 / 2016-11-29
+
 * hotfix to flush cache during upgrade routine
 
 #### 6.1.0 / 2016-11-28
+
 * improved transient saving to save optimized version of transient rather that whole API response
 * changed _Refresh Cache_ to POST to only run once.
 * fixed `API::wp_update_response` to properly reset the update transient after a shiny update or cache flush
@@ -562,6 +654,7 @@
 * fixed `uninstall.php` for option not transient
 
 #### 6.0.0 / 2016-10-26
+
 * added `class Language_Pack` and new repo, [Language Pack Maker](https://github.com/afragen/github-updater-language-pack-maker), to create and update from a separate Language Pack repository.
 * added new header for Language Pack updates. Language Pack updates can and will now be decoupled from the plugin release.
 * obfuscated token/password values in Settings page, for @scarstens
@@ -583,6 +676,7 @@
 * added query arg of `?per_page=100` to GitLab query for project IDs, this is max number able to be retrieved, yes an edge case [#465](https://github.com/afragen/github-updater/issues/465)
 
 #### 5.6.2 / 2016-09-24
+
 * added reset of _update\_plugins_ and _update\_themes_ transient with _Refresh Transients_
 * throw Exception for webhook update if PUSH is to branch different from webhook
 * removed translations from RESTful endpoint responses, only visible from webhook or direct call
@@ -590,11 +684,13 @@
 * fixed PHP notice in `Bitbucket_API`, [#451](https://github.com/afragen/github-updater/issues/451)
 
 #### 5.6.1 / 2016-09-15
+
 * fixed PHP notices when parsing `readme.txt` with missing data
 * fixed PHP fatal by namespacing `class WordPressdotorg\Plugin_Directory\Readme\Parser`
 * fixed PHP fatal in `WordPressdotorg\Plugin_Directory\Readme\Parser` by avoiding dereferenced array call
 
 #### 5.6.0 / 2016-09-14
+
 * added `Refresh Transients` button to Settings page because the `Check Again` button is going away
 * added `redirect_on_save()` for Settings page
 * switched to slightly modified version of [wp.org plugin readme parser](https://meta.trac.wordpress.org/browser/sites/trunk/wordpress.org/public_html/wp-content/plugins/plugin-directory/readme/class-parser.php), now accepts _Markdownified_ readme.txt files
@@ -610,6 +706,7 @@
 * fixed extended naming when installing forks of plugins and plugins
 
 #### 5.5.0 / 2016-07-02
+
 * better internationalization for changing plugin _View details_ link
 * refactored and improved `class Additions` for `GitHub Updater Additions` plugin
 * fixed using GitLab CE private token with using `class Install`
@@ -629,6 +726,7 @@
 * fixed extended naming issue when branch switching, [#429](https://github.com/afragen/github-updater/issues/429)
 
 #### 5.4.1 / 2016-04-21
+
 * get tags for themes to rollback even if no updates are available. I was overzealous in cutting remote API calls.
 * ManageWP now works for Remote Management.
 * fixed bug in `GitLab_API` to use `path` and not `name`. Thanks @marbetschar
@@ -643,6 +741,7 @@
 * typecast `readme.txt` response to array, fix for occasional malformed `readme.txt` file
 
 #### 5.4.0 / 2016-3-18
+
 * fixed deprecated PHP4 constructor in vendor class.
 * added `class Additions` to process JSON config from hook to add repos to GitHub Updater, see [GitHub Updater Additions](https://github.com/afragen/github-updater-additions)
 * added necessary code in `class Plugin` and `class Theme` for above
@@ -655,6 +754,7 @@
 * updated readme.txt with _Other Notes_ information
 
 #### 5.3.4 / 2016-01-24
+
 * reset 'new_version' in update transient to avoid _up to date_ failure with branch switching.
 * fixed display of branch switching themes on single install.
 * fixed bug in getting Bitbucket branch names.
@@ -662,11 +762,13 @@
 * work better with shiny updates.
 
 #### 5.3.3 / 2016-01-04
+
 * removed added filters, below as they didn't add functionality to this plugin.
 * try to use references to `&$this`
 * added PHPUnit testing setup, I could use help writing tests. A great way to contribute. :-)
 
 #### 5.3.2 / 2015-12-21
+
 * code simplification for `upgrader_source_selection`
 * fixed plugin branch switching to override _up-to-date_ message (most of the time)
 * added filters for developers, well I wanted them anyway ;-)
@@ -678,10 +780,12 @@
 * fixed renaming of updating plugins that were never initially renamed when first installed. Strange bug.
 
 #### 5.3.1 / 2015-12-03
+
 * fixed PHP notice during remote installation
 * fixed remote install [#325](https://github.com/afragen/github-updater/issues/325)
 
 #### 5.3.0 / 2015-11-25
+
 * fixed parsing of `readme.txt` for donate link
 * refactored transient storage resulting in significantly few database calls, more performant.
 * moved `{get|set}_transient` functions to `abstract class API`
@@ -690,12 +794,14 @@
 * overhauled of renaming code back to using `upgrader_source_selection` and for WordPress 4.4 adding `$args['hook_extra']` to `upgrader_source_selection` filter. Thanks @dd32!
 
 #### 5.2.0 / 2015-10-14
+
 * fixed [#309](https://github.com/afragen/github-updater/issues/309) for proper GitHub Enterprise endpoints
 * added setting for GitHub Enterprise personal access token
 * new `function _add_access_token()` for `class GitHub_API`
 * updatede `erusev/parsedown` to current release
 
 #### 5.1.2 / 2015-09-25
+
 * added `upgrader_source_selection` filter back for correct updating of current, active theme.
 * fixed [#293](https://github.com/afragen/github-updater/issues/293) and [#297](https://github.com/afragen/github-updater/issues/297)
 * removed `pre_http_request` filter blocking
@@ -703,9 +809,11 @@
 * play nice with current master branch of wp-update-php
 
 #### 5.1.1 / 2015-09-09
+
 * hotfix to comment out `pre_http_request` filter. Updating of plugin doesn't work. I need to re-think this one.
 
 #### 5.1.0 / 2015-09-09
+
 * refactored Plugin and Theme constructors moving code calling APIs getting remote data to separate functions
 * fixed [#281](https://github.com/afragen/github-updater/issues/281), removed 'Activate Plugin/Theme' buttons post-install
 * fixed [#284](https://github.com/afragen/github-updater/issues/284) for GitLab CE/Enterprise install and update
@@ -719,10 +827,12 @@
 * updated POT file
 
 #### 5.0.1 / 2015-08-18
+
 * updated to current `erusev/parsedown` release, fixes PHP7 issue
 * updated to current `WPupdatePHP/wp-update-php/release-1-1-0` branch
 
 #### 5.0.0 / 2015-08-15
+
 * fix rollback for GitLab themes
 * add branch switcher for themes
 * escape all printed strings
@@ -734,15 +844,18 @@
 * fixed [#267](https://github.com/afragen/github-updater/issues/267) thanks @stevehenty and @rocketgenius
 
 #### 4.6.2
+
 * refactor remote update services to new `class Remote_Update`
 * general security fixes, don't call files directly...
 * fix/test for remote updating via InfiniteWP. Child themes are not identified by IWP as needing updates, otherwise it seems to work as expected.
 
 #### 4.6.1
+
 * fix for remote updating via iThemes Sync
 * fix for renaming when AJAX updating of plugins
 
 #### 4.6.0
+
 * newer, much more precise method for renaming based upon selected repos from the dashboard. Yes, I tested on staging server. :-)
 * added feature to use extended naming of plugin directories to avoid potential conflict with WP.org slugs. Props @reinink for the idea.
 * strip `.git` from the end of the plugin or theme URI for those who haven't gotten to the README yet.
@@ -753,33 +866,41 @@
 * [broken: renaming during updates from upgrade services](https://github.com/afragen/github-updater/issues/262)
 
 #### 4.5.7
+
 * hotfix GitLab private updating/installing
 * fix some PHP notices
 
 #### 4.5.6
+
 * bugfix for renaming code to properly strip `<owner>-`
 * most of Russian translation by [Anatoly Yumashev](https://github.com/yumashev)
 
 #### 4.5.5
+
 * back to simplifying the renaming code, always remember to test renaming on live server.
 * strip `<owner>-` and `-<hash>` from beginning and end of update for more precise renaming
 * I think this is the end of renaming for a while. :P
 
 #### 4.5.4
+
 * hotfix for renaming, I reverted back a bunch with more extensive testing on server. It's amazing how different renaming is locally vs on server.
 
 #### 4.5.3
+
 * updated language files -- oops
 
 #### 4.5.2
+
 * cleanup and refactor of renaming code.
 * added Romanian translation by [Corneliu Cirlan](https://github.com/corneliucirlan)
 * added Japanese translation by [ishihara](https://github.com/1shiharat)
 
 #### 4.5.1
+
 * fix bug so updates display without having to randomly refresh.
 
 #### 4.5.0
+
 * fix some PHP notices
 * add update by GitHub release asset in lieu of update by tag when asset is present
 * install asset via remote install if asset URI used
@@ -789,6 +910,7 @@
 * remove checkbox when loaded as mu-plugin, props @pbearne
 
 #### 4.4.0
+
 * only add custom user agent once :P
 * add support of GitHub Enterprise via new `GitHub Enterprise` header
 * sanitize filter input
@@ -797,6 +919,7 @@
 * refactor creation of header parts and URIs
 
 #### 4.3.1
+
 * Spanish translation by [Jose Miguel Bejarano](https://github.com/xDae)
 * German translation by [Linus Metzler](https://github.com/limenet)
 * squish PHP notices
@@ -804,6 +927,7 @@
 * fixed edge case renaming bug
 
 #### 4.3.0
+
 * use @WPUpdatePhp `class WPUpdatePhp` for PHP version checking
 * use <https://api.wordpress.org> not http
 * Arabic translation by [Hyyan Abo FAkher](https://github.com/hyyan)
@@ -818,37 +942,45 @@
 * add 'View details' link in Plugins page
 
 #### 4.2.2
+
 * fix POT and some updated languages, thanks @fxbenard
 * fix PHP notice for `$options` settings on initial install - thanks @benosman
 
 #### 4.2.1
+
 * add PHP version check for graceful exit
 * add to error message for 401 error.
 * save settings when remote installing a private repo
 
 #### 4.2.0
+
 * added minutes until reset of GitHub API's rate limit to error message
 * added `placeholder = "master"` to remote install branch text input
 * I should have made the last version 4.2.0 as I added a new feature. I'll try to be better with semantic versioning in the future. ;-)
 
 #### 4.1.4
+
 * add message to certain admin pages when API returns HTTP error code
 * update POT to remove HTML entity codes from strings and generally try to make i18n better
 * Swedish translation by [Andréas Lundgren](https://github.com/Adevade)
 * added logo to README and Settings page
 
 #### 4.1.3
+
 * use `strtolower` comparison of plugin directory and repo name. This might is an issue related to the manual installation of a plugin before any update might occur. This allows the **View details** screen to display in these instances where the case of the directory and repo aren't identical. This doesn't work for themes.
 
 #### 4.1.2
+
 * hide star ratings from **View details** screen for private repos
 
 #### 4.1.1
+
 * add `plugin` to `$response` in `Plugin::pre_set_site_transient_update_plugins` to fix PHP Notice
 * rename `classes` to `src` to follow more conventional naming
 * refactor renaming code to function under all circumstances, I hope ;-)
 
 #### 4.1.0
+
 * added remote installation of plugins or themes, both public and private
 * remote installation using either full URI or short `<owner><repo>` format
 * created new tabbed interface for settings
@@ -856,9 +988,11 @@
 * I'd like to apologize to all my translators for adding new strings often, you guys are great, thanks!
 
 #### 4.0.1
+
 * hotfix to force an array type when sanitizing settings, it gave me a fatal I wasn't expecting.
 
 #### 4.0.0
+
 * changed `is_a()` to `instanceof` per <https://core.trac.wordpress.org/changeset/31188>
 * requires PHP 5.3 or greater as autoloader class requires namespacing
 * updated all classes for namespacing
@@ -869,12 +1003,14 @@
 * removed reading/saving `GitHub Access Token` header into settings. Must use Settings Page.
 
 #### 3.2.3 - 3.2.6
+
 * added French translation by @daniel-menard
 * added Italian translation by @overclokk
 * added Portuguese translation by @valeriosouza
 * added Ukrainian translation by @andriiryzhkov (our first translation!!)
 
 #### 3.2.2
+
 * remove scraping of user/pass from Bitbucket URI as it's no longer needed
 * use `Requires WP` header to fill view options detail
 * rename private methods to begin with underscore
@@ -882,19 +1018,23 @@
 * stop re-creating transient of transients if it already exists
 
 #### 3.2.1
+
 * refactored adding extra headers to `class GitHub_Updater` to ensure they're added before they're needed, resolves issue with WooThemes Updater plugin
 * update .pot file
 
 #### 3.2.0
+
 * changed settings page and how Bitbucket Private repos authenticate with your username/password
 * update .pot
 
 #### 3.1.1
+
 * minor transient cleanup
 * update .pot file
 * fix to get all themes under both single and multisite installs
 
 #### 3.1.0
+
 * woot!! - updating from Bitbucket private repos now works!!
 * fix to only add HTTP Authentication header under correct circumstances. This obviates need to fix for other APIs that might also use HTTP Authentication.
 * fix to correctly add GitHub Access Token from `$options` to `$download_link` - oops
@@ -907,35 +1047,43 @@
 * fix to save settings from single site installations
 
 #### 3.0.7
+
 * more efficient solution to HTTP Authentication issues
 * more efficient options cleanup
 * remove some unnecessary code resulting in few database calls
 * change default option setting to use `add_site_option` so not autoloading options
 
 #### 3.0.6
+
 * fix for other APIs that use HTTP Authentication, like JetPack - thanks @tsquez
 
 #### 3.0.5
+
 * fix more PHP Notices
 * correctly set defaults for Settings page :P
 * remove options for plugins/themes that are no longer present
 
 #### 3.0.4
+
 * Who would've thought `file_exists` was case-sensitive
 * when checking meta, use `empty()` instead of `! isset()` for `null array`
 * set defaults for Settings page
 * fix a number of PHP Notices
 
 #### 3.0.3
+
 * Bugfix to properly authenticate on JetPack Stats page
 
 #### 3.0.2
+
 * simplify check and exit on Settings if no Bitbucket plugins/themes
 
 #### 3.0.1
+
 * Remove Bitbucket settings from page if no appropriate plugins or themes exist.
 
 #### 3.0.0
+
 * Settings Page for your GitHub Access Tokens
 * added POT file and some more i18n fixes - thanks @grappler
 * added `Requires WP` and `Requires PHP` headers to set minimum version requirements - for @GaryJ
@@ -943,6 +1091,7 @@
 * unset any HTTP Authorization headers for GitHub API calls as this gives a 401 error. Rare potential bug if you have private Bitbucket repos.
 
 #### 2.9.0
+
 * move instantiation of `class GitHub_Plugin_Updater` and `class GitHub_Theme_Updater` into `GitHub_Updater::init()` and restrict to `current_user_can( 'update_plugins' )` and `current_user_can( 'update_themes' )` so that non-privileged users don't incur load time.
 * now loading classes via `spl_autoload_register`
 * switched to `erusev/parsedown` for rendering changelogs, faster and more light-weight.
@@ -954,21 +1103,25 @@
 * composer support added, thanks @hyyan
 
 #### 2.8.1
+
 * fix for WP Coding Guidelines
 * added check for upgrade process instead of `$_GET['action']` (props @SLv99)
 * launch classes from `GitHub_Updater::init()` so can load in `add_action( 'init', ...` from `__construct()`. Hopefully this will solve issues with remote upgraders like iThemes Sync, ManageWP, InfiniteWP, and MainWP. Thanks @jazzsequence for testing. Thanks @SLv99 for bringing this to my attention.
 
 #### 2.8.0
+
 * refactor API classes and `class GitHub_Updater` to add extra headers from API class. This should allow for better abstraction. Just need to call `GitHub_Updater_{repo}_API::add_headers()` in `class GitHub_Plugin_Updater` and `class GitHub_ Theme_Updater`.
 * remove @since tags
 * move `maybe_authenticate_http` to `class GitHub_Updater_Bitbucket_API` as it's not used elsewhere
 * use non-strict check for http response code (thanks @echav)
 
 #### 2.7.1
+
 * added early exit if no local `CHANGES.md` file exists. This should save an API call.
 * pull update from WP.org if plugin hosted in WP.org and branch is `master`.
 
 #### 2.7.0
+
 * created functions for getting and setting transients
 * added deletion of all transients if _force-check_ is used
 * removed `GitHub Timeout` and `Bitbucket Timeout` headers
@@ -983,12 +1136,15 @@
 * fix for incorrect plugin upgrade link in detail popup
 
 #### 2.6.3
+
 * quick error checking fix for `wp_remote_get` error to wordpress.org API - thanks @deckerweb
 
 #### 2.6.1
+
 * fixed CHANGES.md for GFM strike-through
 
 #### 2.6.0
+
 * added transient to `plugins_api` call
 * better zeroing of variables in getting local theme data
 * add error checking to loading of classes
@@ -1000,39 +1156,49 @@
 * added graceful exit if repo does not exist
 
 #### 2.5.0
+
 * added `class GitHub_Updater_Bitbucket_API` for Bitbucket hosted plugins and themes.
 * improvements to efficiency by not loading when `DOING_AJAX`
 * improvements to efficiency in use of transients
 
 #### 2.4.5
+
 * set PHP MarkdownExtra posts and comments markup to false props @MikeHansonMe
 * remove WP plugin header from `markdown.php`
 
 #### 2.4.4
+
 * forgot to include markdown.php - damn
 
 #### 2.4.2
+
 * removed PHP Markdown Lib as it required PHP >= 5.3 and that's higher than required by WordPress core.
 
 #### 2.4.1
+
 * switched from PHP Markdown Classic to the new PHP Markdown Lib to prevent collisions with other plugins, like Markdown On Save/Improved that also load PHP Markdown or PHP MarkdownExtra.
 
 #### 2.4.0
+
 * fixed transient assignment for tags returning empty array.
 * added transient for `CHANGES.md` to themes, should further cut down on API 403 errors.
 * new feature: theme rollback to previous version thanks @scarstens
 * changed update methodology to use most recent tag first. If not tagged update from default branch.
 
 #### 2.3.3
+
 * fixed download link to have correct base URI for Repository Contents API. Oops.
 
 #### 2.3.2
+
 * rewrite of `GitHub_Update_GitHub_API::construct_download_link` to download zipball and provide appropriate endpoint.
 
 #### 2.3.1
+
 * now saving transient and adding early return if API returns 404, this should speed up plugin when repo doesn't have `CHANGES.md` file and provide for early return in no tags have been created. If no tags have been created the API is still hit.
 
 #### 2.3.0
+
 * moved action hook to remove `after_theme_row_$stylesheet` to `class GitHub_Theme_Updater`
 * added feature: if branch other than `master` is specified then tagged version will be ignored. This should make it much easier for beta testing to groups. See [README.md](https://github.com/afragen/github-updater/blob/develop/README.md)
 * converted `class GitHub_Update_GitHub_API` to extension of `class GitHub_Updater`
@@ -1040,13 +1206,16 @@
 * greatly simplified bug fix from 2.2.2, now using Themes API.
 
 #### 2.2.2
+
 * bug fix for removing update notice for WP.org repo themes. Oops.
 
 #### 2.2.1
+
 * minor code simplifications
 * many thanks to @grappler for solving how to remove default `after_theme_row_$stylesheet`
 
 #### 2.2.0
+
 * moved check and load for `markdown.php` into only function that uses it.
 * minor README updates
 * added abort if this plugin called directly
@@ -1060,9 +1229,11 @@
 * add custom `after_theme_update_{$stylesheet}` detail.
 
 #### 2.1.1
+
 * bug fix to return early from call to `plugins_api` if not getting plugin information. Fixes issue with Plugin Search.
 
 #### 2.1.0
+
 * simplify check for `class Markdown_Parser`
 * refactor to pass `class GitHub_Update_GitHub_API` as class object. This should enable the creation of other class objects for Bitbucket, etc.
 * fix for setting branch when API not responding
@@ -1070,9 +1241,11 @@
 * redesigned filter for setting transient timeout, but still not working (pull requests welcome)
 
 #### 2.0.1
+
 * bug fix to not load `markdown.php` twice. Just in case it's loaded by some other plugin.
 
 #### 2.0.0
+
 * rearranged where I put `GitHub Plugin URI` header, etc. in README and in this plugin.
 * minor spelling fixes
 * renamed some functions for their hooks
@@ -1086,42 +1259,52 @@
 * included Michel Fortin's [PHP-Markdown](http://michelf.ca/projects/php-markdown/) for rendering `CHANGES.md`
 
 #### 1.8.1
+
 * added some variable declarations
 * added early return in no GitHub sourced plugins or themes are identified
 
 #### 1.8.0
+
 * refactored to use base class `GitHub_Updater` and extending classes `GitHub_Plugin_Updater` and `GitHub_Theme_Updater`.
 
 #### 1.7.4
+
 * changed method of not overwriting extra headers to pass array.
 
 #### 1.7.3
+
 * change `'...'` to `&#8230` in renaming notification
 * fix to not overwrite extra headers of other plugins.
 
 #### 1.7.2
+
 * removed sorting option from `scandir`. Doesn't work with older versions of PHP < 5.4.0
 * removed extraneous data from array in `multisite_get_themes`
 
 #### 1.7.1
+
 * updated the transient for themes
 * replaced `readdir` with `scandir` for creating WP\_Theme object in multisite
 
 #### 1.7.0
+
 * updated class-theme-updater.php to utilize WP\_Theme class
 * added method `get_remote_tag` to update plugins using tags or branch, depending upon which has greater version number.
 * `get_remote_tag` uses transient to limit calls to API
 * fix for `wp_get_themes` not working under plugin network activation on multisite installation. I recreated `wp_get_themes` by reading in the theme directory and adding the WP\_Theme object of `wp_get_theme( 'dir_in_themes_dir' )` to an array.
 
 #### 1.6.1
+
 * bug fix for undeclared variable $github_plugins
 
 #### 1.6.0
+
 * Added separate method to parse plugin repo info from header
 * Shortened GitHub Plugin URI to only use owner/repo
 * Shortened GitHub Theme URI to only use owner/repo
 
 #### 1.5.0
+
 * Lots of documentation and some bug fixes. Thanks @GaryJones
 * Made version checking regex more compatible. Thanks @GaryJones
 * Added ability to define branch to update.
@@ -1131,33 +1314,43 @@
 * Major thanks to @GaryJones for all the pull requests and generally improving this project.
 
 #### 1.4.3
+
 * Fixed a couple of non-fatal PHP errors. Thanks @jazzsequence
 
 #### 1.4.2
+
 * Cleaned up readme's markdown.
 
 #### 1.4.1
+
 * Fixed the README to more accurately reflect support for both plugins and themes.
 
 #### 1.4
+
 * Fix for rename functions to be more precise, otherwise might rename wp.org repo themes.
 
 #### 1.3
+
 * Simplify a couple of if statements.
 
 #### 1.2
+
 * Fix to ignore renaming for wp.org plugins
 
 #### 1.1
+
 * Sanity check for theme api uri
 
 #### 1.0
+
 * Serialized WP\_Theme object to search for added GitHub header, lots of help from Seth. No more `file_get_contents`.
 * Converted plugin class and added it to make joint plugin/theme updater.
 
 #### 0.2
+
 * Code cleanup.
 * Limit `file_get_contents` to 2000 bytes.
 
 #### 0.1
+
 * Initial commit
