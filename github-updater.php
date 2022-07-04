@@ -12,7 +12,7 @@
  * Plugin Name:       GitHub Updater
  * Plugin URI:        https://github.com/cbratschi/github-updater
  * Description:       A plugin to automatically update GitHub, Bitbucket, GitLab, or Gitea hosted plugins, themes, and language packs. It also allows for remote installation of plugins or themes into WordPress.
- * Version:           9.9.12
+ * Version:           9.9.13
  * Author:            Andy Fragen, Christoph Bratschi
  * License:           GNU General Public License v2
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.html
@@ -39,12 +39,14 @@ if ( ! defined( 'WPINC' ) ) {
 $ghu_needed = is_admin() || ( strpos($_SERVER[ 'REQUEST_URI' ], '/wp-json/github-updater/') !== false ) || (defined( 'WP_CLI' ) && \WP_CLI);
 
 if ( ! $ghu_needed ) {
-    //debug cbxx
+    //debug
+    /*
     if (function_exists( 'ap_debug' )) {
         ap_debug( 'GHU not needed.' );
     } else {
         error_log( 'GHU not needed. ' . $_SERVER[ 'REQUEST_URI' ] );
     }
+    */
 
     //skip
     return;
