@@ -8,7 +8,7 @@ This is a fork of GitHub Updater 9.9.10 with features backported from more recen
 
 ![WordPress Tests](https://github.com/afragen/github-updater/workflows/WordPress%20Tests/badge.svg)
 
-* Contributors: [Andy Fragen](https://github.com/afragen), [Gary Jones](https://github.com/GaryJones), [Seth Carstens](https://github.com/sethcarstens), [Mikael Lindqvist](https://github.com/limikael), [contributors](https://github.com/afragen/github-updater/graphs/contributors)
+* Contributors: [Andy Fragen](https://github.com/afragen), [Christoph Bratschi](https://github.com/cbratschi), [Gary Jones](https://github.com/GaryJones), [Seth Carstens](https://github.com/sethcarstens), [Mikael Lindqvist](https://github.com/limikael), [contributors](https://github.com/afragen/github-updater/graphs/contributors)
 * Tags: plugin, theme, update, updater, github, bitbucket, gitlab, remote install
 * Requires at least: 5.2
 * Requires PHP: 7.4
