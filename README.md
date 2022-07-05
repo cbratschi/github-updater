@@ -1,8 +1,8 @@
+# GitHub Updater
+
 ![GitHub Updater](./assets/GitHub_Updater_logo_small.png)
 
 This is a fork of GitHub Updater 9.9.10 with features backported from more recent version and custom changes done by [Christoph Bratschi](https://github.com/cbratschi).
-
-# GitHub Updater
 
 ![downloads](https://img.shields.io/github/downloads/afragen/github-updater/total) ![downloads@latest](https://img.shields.io/github/downloads/afragen/github-updater/latest/total)
 
@@ -36,7 +36,7 @@ or
     GitHub Theme URI: afragen/test-child
     GitHub Theme URI: https://github.com/afragen/test-child
 
-...where the above URI leads to the __owner/repository__ of your theme or plugin. The URI may be in the format `https://github.com/<owner>/<repo>` or the short format `<owner>/<repo>`. You do not need both. Only one Plugin or Theme URI is required. You **should not** include any extensions like `.git`.
+...where the above URI leads to the **owner/repository** of your theme or plugin. The URI may be in the format `https://github.com/<owner>/<repo>` or the short format `<owner>/<repo>`. You do not need both. Only one Plugin or Theme URI is required. You **should not** include any extensions like `.git`.
 
 ## Slack
 
