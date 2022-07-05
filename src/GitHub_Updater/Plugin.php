@@ -417,6 +417,7 @@ class Plugin {
             if ( ! property_exists( $plugin, 'remote_version' ) ) {
                 continue;
             }
+
             $response = [
                 'slug'             => $plugin->slug,
                 'plugin'           => $plugin->file,
