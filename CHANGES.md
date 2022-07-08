@@ -1,4 +1,5 @@
 #### [unreleased]
+**Do not install via plugin update or latest Git Updater gets installed!**
 
 #### 9.9.13 / 2022-07-04
 
