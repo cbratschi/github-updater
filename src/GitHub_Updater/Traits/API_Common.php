@@ -91,15 +91,21 @@ trait API_Common {
                 break;
 
             case 'bitbucket':
-                $download_base = trailingslashit( $this->get_api_url( $request, true ) );
-                $assets        = isset( $response->values ) ? $response->values : [];
+                $assets = isset( $response->values ) ? $response->values : [];
+
                 foreach ( $assets as $asset ) {
                     if ( 1 === count( $assets ) || 0 === strpos( $asset->name, $this->type->slug ) ) {
-                        $response = $download_base . $asset->name;
+                        $response = $asset->links->self->href;
                         break;
                     }
                 }
-                $response = is_string( $response ) ? $response : null;
+
+                $response                    = is_string( $response ) ? $response : null;
+                $asset->browser_download_url = $response;
+                $asset->download_count       = $asset->downloads;
+
+                //cbxx FIXME $obj param not available
+                //$obj->set_repo_cache( 'release_asset_response', $asset );
                 break;
 
             case 'bbserver':
