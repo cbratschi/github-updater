@@ -1,4 +1,4 @@
-# Copyright (C) 2021 Andy Fragen
+# Copyright (C) 2022 Andy Fragen
 # This file is distributed under the same license as the GitHub Updater plugin.
 msgid ""
 msgstr ""
