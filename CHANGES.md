@@ -1,9 +1,12 @@
 #### [unreleased]
 
+#### 9.9.15 / 2023-02-22
+
+* add git icon to subtab
+
 #### 9.9.14 / 2023-02-22
 
 * support Bitbucket access tokens
-* add git icon to subtab
 
 #### 9.9.13 / 2022-07-04
 
