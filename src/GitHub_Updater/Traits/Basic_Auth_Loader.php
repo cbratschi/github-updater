@@ -82,8 +82,16 @@ trait Basic_Auth_Loader {
 
             if ( 'bitbucket' === $credentials['type'] ) {
                 //Bitbucket basic auth (see https://developer.atlassian.com/server/bitbucket/how-tos/example-basic-authentication/)
-                // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
-                $args['headers']['Authorization'] = 'Basic ' . base64_encode( $credentials['token'] );
+                $token = $credentials['token'];
+
+                if (strpos($token, ':') === false) {
+                    //use access token (available since 2022)
+                    //cbxx TODO verify
+                    $args['headers']['Authorization'] = 'Bearer ' . base64_encode($token);
+                } else {
+                    // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+                    $args['headers']['Authorization'] = 'Basic ' . base64_encode( $token );
+                }
             }
 
             if ( 'gitlab' === $credentials['type'] ) {
@@ -158,6 +166,7 @@ trait Basic_Auth_Loader {
                 $token           = null === $token && ! $bitbucket_org ? $bbserver_token : $token;
                 $type            = 'bitbucket';
                 break;
+
             case 'github':
             case 'gist':
             case $type instanceof GitHub_API:
@@ -166,12 +175,14 @@ trait Basic_Auth_Loader {
                 $token = ! empty( $options[ $slug ] ) ? $options[ $slug ] : $token;
                 $type  = 'github';
                 break;
+
             case 'gitlab':
             case $type instanceof GitLab_API:
                 $token = ! empty( $options['gitlab_access_token'] ) ? $options['gitlab_access_token'] : null;
                 $token = ! empty( $options[ $slug ] ) ? $options[ $slug ] : $token;
                 $type  = 'gitlab';
                 break;
+
             case 'gitea':
             case $type instanceof Gitea_API:
                 $token = ! empty( $options['gitea_access_token'] ) ? $options['gitea_access_token'] : null;
