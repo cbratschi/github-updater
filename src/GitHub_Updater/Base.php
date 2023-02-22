@@ -212,6 +212,7 @@ class Base {
      */
     public function set_options_filter() {
         $config = apply_filters( 'github_updater_set_options', [] );
+
         if ( empty( $config ) ) {
             $config = function_exists( 'apply_filters_deprecated' )
                 ? apply_filters_deprecated( 'github_updater_token_distribution', [ null ], '6.1.0', 'github_updater_set_options' )

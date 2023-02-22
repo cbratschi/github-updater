@@ -258,8 +258,8 @@ class API {
     private function remote_get( $url, $args = [] ) {
         $response = wp_remote_get( $url, $args );
 
-        //debug cbxx
-        error_log('-> get ' . $url);
+        //debug
+        //error_log('-> get ' . $url);
 
         return $response;
     }
@@ -270,8 +270,8 @@ class API {
     private function remote_head( $url, $args = [] ) {
         $response = wp_remote_head( $url, $args );
 
-        //debug cbxx
-        error_log('-> head ' . $url);
+        //debug
+        //error_log('-> head ' . $url);
 
         return $response;
     }

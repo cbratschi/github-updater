@@ -2,7 +2,7 @@
 Contributors: afragen, garyj, sethcarstens, limikael
 Donate link: <https://github.com/sponsors/afragen>
 Tags: plugin, theme, language pack, updater, remote install
-Requires at least: 5.2
+Requires at least: 5.9
 Requires PHP: 7.4
 Tested up to: trunk
 Stable tag: master

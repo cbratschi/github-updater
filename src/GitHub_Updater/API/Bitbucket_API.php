@@ -167,7 +167,9 @@ class Bitbucket_API extends API implements API_Interface {
             $release_asset = $this->get_release_asset();
             $release_asset_redirect = $this->get_release_asset_redirect( $release_asset, true );
 
-            if ( ! $release_asset_redirect && property_exists( $this->response['release_asset_response'], 'browser_download_url' ) ) {
+            if ( ! $release_asset_redirect && isset( $this->response['release_asset_redirect'] )
+                && property_exists( $this->response['release_asset_response'], 'browser_download_url' )
+            ) {
                 // For installing.
                 return $this->response['release_asset_response']->browser_download_url;
             } else {
@@ -387,6 +389,8 @@ class Bitbucket_API extends API implements API_Interface {
             'github_updater_bitbucket_install_settings'
         );
 
+        /*
+        //shown if access token is not set
         add_settings_field(
             'bitbucket_username',
             esc_html__( 'Bitbucket Username', 'github-updater' ),
@@ -412,6 +416,7 @@ class Bitbucket_API extends API implements API_Interface {
             ]
         );
 
+        //shown if access token is set
         add_settings_field(
             'bitbucket_token',
             esc_html__( 'Bitbucket Pseudo-Token', 'github-updater' ),
@@ -423,6 +428,22 @@ class Bitbucket_API extends API implements API_Interface {
                 'token'       => true,
                 'placeholder' => true,
                 'class'       => ! empty( static::$options['bitbucket_access_token'] ) ? '' : 'hidden',
+            ]
+        )
+        */
+
+        //@appamics.CB: always use the token
+        //cbxx TODO verify
+        add_settings_field(
+            'bitbucket_token',
+            esc_html__( 'Bitbucket Pseudo-Token', 'github-updater' ),
+            [ Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ],
+            'github_updater_bitbucket_install_settings',
+            'bitbucket_token',
+            [
+                'id'          => 'bitbucket_access_token',
+                'token'       => true,
+                'placeholder' => true,
             ]
         );
 
@@ -480,6 +501,10 @@ class Bitbucket_API extends API implements API_Interface {
      */
     public function print_section_bitbucket_token() {
         esc_html_e( 'Enter your personal Bitbucket username and password. It will automatically be converted to a pseudo-token.', 'github-updater' );
+
+        //Bitbucket logo
+        $icon = plugin_dir_url( dirname( __DIR__ ) ) . 'assets/bitbucket-logo.svg';
+        printf( '<img class="git-oauth-icon" src="%s" alt="Bitbucket logo" />', esc_attr( $icon ) );
     }
 
     /**
@@ -488,6 +513,8 @@ class Bitbucket_API extends API implements API_Interface {
      * @param string $type Plugin|theme.
      */
     public function add_install_settings_fields( $type ) {
+        /*
+        //user name & password
         add_settings_field(
             'bitbucket_username',
             esc_html__( 'Bitbucket Username', 'github-updater' ),
@@ -495,10 +522,23 @@ class Bitbucket_API extends API implements API_Interface {
             'github_updater_install_' . $type,
             $type
         );
+
         add_settings_field(
             'bitbucket_password',
             esc_html__( 'Bitbucket Password', 'github-updater' ),
             [ $this, 'bitbucket_password' ],
+            'github_updater_install_' . $type,
+            $type
+        );
+        */
+
+        //access token
+        //@appamics.CB: only using access token
+        //cbxx TODO verify
+        add_settings_field(
+            'bitbucket_access_token',
+            esc_html__( 'Bitbucket Access Token', 'github-updater' ),
+            [ $this, 'bitbucket_access_token' ],
             'github_updater_install_' . $type,
             $type
         );
@@ -529,6 +569,21 @@ class Bitbucket_API extends API implements API_Interface {
             <br>
             <span class="description">
                 <?php esc_html_e( 'Enter Bitbucket password.', 'github-updater' ); ?>
+            </span>
+        </label>
+        <?php
+    }
+
+    /**
+     * Bitbucket access token for remote install.
+     */
+    public function bitbucket_access_token() {
+        ?>
+        <label for="bitbucket_access_token">
+            <input class="bitbucket_setting" type="text" style="width:50%;" id="bitbucket_access_token" name="bitbucket_access_token" value="">
+            <br>
+            <span class="description">
+                <?php esc_html_e( 'Enter Bitbucket access token (e.g. username:password or full token).', 'github-updater' ); ?>
             </span>
         </label>
         <?php
