@@ -258,8 +258,15 @@ class API {
     private function remote_get( $url, $args = [] ) {
         $response = wp_remote_get( $url, $args );
 
+        /*
         //debug
-        //error_log('-> get ' . $url);
+        error_log('-> get ' . $url);
+
+        if (is_wp_error($response)) {
+            error_log('-> failed: ' . $response->get_error_message());
+            error_log(json_encode($args));
+        }
+        */
 
         return $response;
     }
@@ -270,8 +277,15 @@ class API {
     private function remote_head( $url, $args = [] ) {
         $response = wp_remote_head( $url, $args );
 
+        /*
         //debug
-        //error_log('-> head ' . $url);
+        error_log('-> head ' . $url);
+
+        if (is_wp_error($response)) {
+            error_log('-> failed: ' . $response->get_error_message());
+            error_log(json_encode($args));
+        }
+        */
 
         return $response;
     }

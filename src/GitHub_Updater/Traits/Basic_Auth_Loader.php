@@ -53,6 +53,7 @@ trait Basic_Auth_Loader {
             $args = array_merge( $args, $this->add_auth_header( $args, $url ) );
             $args = array_merge( $args, $this->unset_release_asset_auth( $args, $url ) );
         }
+
         remove_filter( 'http_request_args', [ $this, 'download_package' ] );
 
         return $args;
@@ -86,8 +87,9 @@ trait Basic_Auth_Loader {
 
                 if (strpos($token, ':') === false) {
                     //use access token (available since 2022)
-                    //cbxx TODO verify
-                    $args['headers']['Authorization'] = 'Bearer ' . base64_encode($token);
+                    //FIXME not working: Token is invalid or not supported for this endpoint.
+                    //FIXME error: Download failed. Too many redirects
+                    $args['headers']['Authorization'] = 'Bearer ' . $token;
                 } else {
                     // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
                     $args['headers']['Authorization'] = 'Basic ' . base64_encode( $token );

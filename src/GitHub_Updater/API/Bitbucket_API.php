@@ -433,7 +433,6 @@ class Bitbucket_API extends API implements API_Interface {
         */
 
         //@appamics.CB: always use the token
-        //cbxx TODO verify
         add_settings_field(
             'bitbucket_token',
             esc_html__( 'Bitbucket Pseudo-Token', 'github-updater' ),
@@ -534,7 +533,6 @@ class Bitbucket_API extends API implements API_Interface {
 
         //access token
         //@appamics.CB: only using access token
-        //cbxx TODO verify
         add_settings_field(
             'bitbucket_access_token',
             esc_html__( 'Bitbucket Access Token', 'github-updater' ),
@@ -583,7 +581,7 @@ class Bitbucket_API extends API implements API_Interface {
             <input class="bitbucket_setting" type="text" style="width:50%;" id="bitbucket_access_token" name="bitbucket_access_token" value="">
             <br>
             <span class="description">
-                <?php esc_html_e( 'Enter Bitbucket access token (e.g. username:password or full token).', 'github-updater' ); ?>
+                <?php esc_html_e( 'Enter Bitbucket access token (i.e. username:password or username:token).', 'github-updater' ); ?>
             </span>
         </label>
         <?php
