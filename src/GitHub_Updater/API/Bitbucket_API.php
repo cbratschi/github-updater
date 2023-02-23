@@ -501,9 +501,9 @@ class Bitbucket_API extends API implements API_Interface {
     public function print_section_bitbucket_token() {
         esc_html_e( 'Enter your personal Bitbucket username and password. It will automatically be converted to a pseudo-token.', 'github-updater' );
 
-        //Bitbucket logo
-        $icon = plugin_dir_url( dirname( __DIR__ ) ) . 'assets/bitbucket-logo.svg';
-        printf( '<img class="git-oauth-icon" src="%s" alt="Bitbucket logo" />', esc_attr( $icon ) );
+        //Bitbucket logo (FIXME missing CSS)
+        //$icon = plugin_dir_url( dirname( __DIR__ ) ) . '../assets/bitbucket-logo.svg';
+        //printf( '<img class="git-oauth-icon" src="%s" alt="Bitbucket logo" />', esc_attr( $icon ) );
     }
 
     /**
