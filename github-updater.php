@@ -45,6 +45,8 @@ $ghu_needed = ( strpos($_SERVER[ 'REQUEST_URI' ], '/wp-json/github-updater/') !=
 if (is_admin() && !$ghu_needed) {
     global $pagenow;
 
+    //Note: link to plugin no longer shown in options menu,
+    //       only on the following screens:
     $pages = [
         'update-core.php',
         'themes.php',
@@ -57,12 +59,14 @@ if (is_admin() && !$ghu_needed) {
         $ghu_needed = true;
     }
 
-    //debug cbxx
+    //debug
+    /*
     if (function_exists('ap_debug')) {
         ap_debug('Page: ' . $pagenow . ' ' . ($ghu_needed ? 'on':'off'));
     }
 
     error_log('Page: ' . $pagenow . ' ' . ($ghu_needed ? 'on':'off'));
+    */
 }
 
 if ( ! $ghu_needed ) {
