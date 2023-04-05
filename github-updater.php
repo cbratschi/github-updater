@@ -61,6 +61,8 @@ if (is_admin() && !$ghu_needed) {
     if (function_exists('ap_debug')) {
         ap_debug('Page: ' . $pagenow . ' ' . ($ghu_needed ? 'on':'off'));
     }
+
+    error_log('Page: ' . $pagenow . ' ' . ($ghu_needed ? 'on':'off'));
 }
 
 if ( ! $ghu_needed ) {
