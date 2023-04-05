@@ -1,5 +1,9 @@
 #### [unreleased]
 
+#### 9.9.17 / 2023-04-05
+
+* load plugin less often in admin interface
+
 #### 9.9.16 / 2023-02-23
 
 * cleanup
