@@ -1,5 +1,9 @@
 #### [unreleased]
 
+#### 9.9.18 / 2023-04-18
+
+* load plugin on options.php page too.
+
 #### 9.9.17 / 2023-04-05
 
 * load plugin less often in admin interface
