@@ -1,5 +1,9 @@
 #### [unreleased]
 
+#### 9.9.19 / 2023-04-19
+
+* support plugin release notes screen too.
+
 #### 9.9.18 / 2023-04-18
 
 * load plugin on options.php page too.
