@@ -86,6 +86,13 @@ class Base {
     protected $config;
 
     /**
+     * Rollback variable.
+     *
+     * @var string|bool
+     */
+    protected $tag = false;
+
+    /**
      * Constructor.
      */
     public function __construct() {
@@ -505,6 +512,7 @@ class Base {
         $repo_api = Singleton::get_instance( 'API', $this )->get_repo_api( $repo->git, $repo );
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended
         $this->tag     = isset( $_GET['rollback'] ) ? sanitize_text_field( wp_unslash( $_GET['rollback'] ) ) : false;
+
         $slug          = 'plugin' === $type ? $repo->file : $repo->slug;
         $download_link = $repo_api->construct_download_link( $this->tag );
 

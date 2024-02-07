@@ -71,6 +71,11 @@ class API {
     protected $response = [];
 
     /**
+     * Type.
+     */
+    protected $type = null;
+
+    /**
      * Variable to hold AWS redirect URL.
      *
      * @var string|\WP_Error $redirect
@@ -656,13 +661,16 @@ class API {
         }
 
         $readme['remaining_content'] = ! empty( $readme['remaining_content'] ) ? $readme['remaining_content'] : null;
+
         if ( empty( $readme['sections']['other_notes'] ) ) {
             unset( $readme['sections']['other_notes'] );
         } else {
             $readme['sections']['other_notes'] .= $readme['remaining_content'];
         }
+
         unset( $readme['sections']['screenshots'], $readme['sections']['installation'] );
         $readme['sections']       = ! empty( $readme['sections'] ) ? $readme['sections'] : [];
+
         $this->type->sections     = array_merge( (array) $this->type->sections, (array) $readme['sections'] );
         $this->type->tested       = isset( $readme['tested'] ) ? $readme['tested'] : null;
         $this->type->requires     = isset( $readme['requires'] ) ? $readme['requires'] : null;

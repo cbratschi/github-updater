@@ -41,6 +41,14 @@ class Branch {
     private static $options;
 
     /**
+     * Variable to hold all repository remote info.
+     *
+     * @access protected
+     * @var array
+     */
+    protected $response = [];
+
+    /**
      * Branch constructor.
      *
      * @access public
@@ -85,6 +93,7 @@ class Branch {
         // phpcs:disable WordPress.Security.NonceVerification.Recommended
         // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
         $rollback = isset( $_GET['rollback'] ) ? wp_unslash( $_GET['rollback'] ) : false;
+
         // Exit early if not a rollback, ie normal update.
         if ( ! $rollback ) {
             return;
@@ -92,6 +101,7 @@ class Branch {
 
         $tag_array    = isset( $this->cache['tags'] ) && is_array( $this->cache['tags'] );
         $in_tag_array = $tag_array && in_array( $rollback, $this->cache['tags'], true );
+
         if ( $in_tag_array ) {
             $current_branch = isset( $this->cache['PrimaryBranch'] ) ? $this->cache['PrimaryBranch'] : 'master';
         }

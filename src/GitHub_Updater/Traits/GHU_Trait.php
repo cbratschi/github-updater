@@ -105,10 +105,13 @@ trait GHU_Trait {
         if ( is_wp_error( $response ) ) {
             return false;
         }
+
         $hours = $this->get_class_vars( 'API', 'hours' );
+
         if ( ! $repo ) {
             $repo = isset( $this->type->slug ) ? $this->type->slug : 'ghu';
         }
+
         $cache_key = 'ghu-' . md5( $repo );
         $timeout   = $timeout ? $timeout : '+' . $hours . ' hours';
 
