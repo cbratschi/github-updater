@@ -1,5 +1,9 @@
 #### [unreleased]
 
+#### 9.9.20 / 2024-02-07
+
+* PHP fixes
+
 #### 9.9.19 / 2023-04-19
 
 * support plugin release notes screen too.
