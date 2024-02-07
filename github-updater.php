@@ -22,7 +22,7 @@
  * GitHub Plugin URI: https://github.com/cbratschi/github-updater
  * GitHub Languages:  https://github.com/afragen/github-updater-translations
  * Requires at least: 6.0
- * Tested up to:      6.2
+ * Tested up to:      6.4.3
  * Requires PHP:      7.4
  */
 
