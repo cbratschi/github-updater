@@ -1,8 +1,12 @@
 #### [unreleased]
 
+#### 9.9.21 / 2024-02-20
+
+* Fixed plugin update.
+
 #### 9.9.20 / 2024-02-07
 
-* PHP fixes
+* PHP fixes.
 
 #### 9.9.19 / 2023-04-19
 
@@ -14,38 +18,38 @@
 
 #### 9.9.17 / 2023-04-05
 
-* load plugin less often in admin interface
+* Load plugin less often in admin interface.
 
 #### 9.9.16 / 2023-02-23
 
-* cleanup
+* Cleanup.
 
 #### 9.9.15 / 2023-02-22
 
-* add git icon to subtab
+* Add Git icon to subtab.
 
 #### 9.9.14 / 2023-02-22
 
-* support Bitbucket access tokens
-  * Note: project access tokens are not working
+* Support Bitbucket access tokens.
+  * Note: project access tokens are not working.
 
 #### 9.9.13 / 2022-07-04
 
-* deactivated debug code
+* Deactivated debug code.
 
 #### 9.9.12 / 2022-03-17
 
-* fixed WP REST branch issue (PHP 8.0 crash)
-* only load if needed (don't interfere with post rendering)
-* speed up `get_dot_org_data()` by using API 1.2 and `wp_remote_head()`
+* Fixed WP REST branch issue (PHP 8.0 crash).
+* Only load if needed (don't interfere with post rendering).
+* Speed up `get_dot_org_data()` by using API 1.2 and `wp_remote_head()`.
 * Bitbucket:
-  * remove branch set from constructor
-  * removed old query arg authentication
+  * Remove branch set from constructor.
+  * Removed old query arg authentication.
   * ...
 
 #### 9.9.11 / 2022-03-16
 
-* initial forked repository
+* Initial forked repository.
 
 #### 9.9.10 / 2021-02-18
 
