@@ -93,6 +93,14 @@ class Base {
     protected $tag = false;
 
     /**
+     * Variable to hold all repository remote info.
+     *
+     * @access protected
+     * @var array
+     */
+    protected $response = [];
+
+    /**
      * Constructor.
      */
     public function __construct() {
@@ -298,11 +306,13 @@ class Base {
         //error_log('-> get data');
 
         $file = 'style.css';
+
         if ( false !== stripos( $repo->type, 'plugin' ) ) {
             $file = basename( $repo->file );
         }
 
         $repo_api = Singleton::get_instance( 'API', $this )->get_repo_api( $repo->git, $repo );
+
         if ( null === $repo_api ) {
             return false;
         }

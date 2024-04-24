@@ -1,5 +1,9 @@
 #### [unreleased]
 
+#### 9.9.22 / 2024-04-24
+
+* Fixed GHU_Trait.
+
 #### 9.9.21 / 2024-02-20
 
 * Fixed plugin update.
