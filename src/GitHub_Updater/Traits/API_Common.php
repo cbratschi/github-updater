@@ -10,7 +10,6 @@
 
 namespace Fragen\GitHub_Updater\Traits;
 
-use Fragen\Singleton;
 use Fragen\GitHub_Updater\Readme_Parser as Readme_Parser;
 
 /**

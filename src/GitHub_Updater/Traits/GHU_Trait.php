@@ -17,6 +17,14 @@ use Fragen\Singleton;
  */
 trait GHU_Trait {
     /**
+     * Variable to hold all repository remote info.
+     *
+     * @access protected
+     * @var array
+     */
+    protected $response = [];
+
+    /**
      * Checks to see if a heartbeat is resulting in activity.
      *
      * @return bool
