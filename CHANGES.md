@@ -1,5 +1,9 @@
 #### [unreleased]
 
+#### 9.9.24 / 2025-01-06
+
+* Response array workaround.
+
 #### 9.9.23 / 2024-06-04
 
 * Fixed GHU_Trait.

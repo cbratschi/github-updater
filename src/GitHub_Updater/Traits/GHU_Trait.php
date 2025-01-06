@@ -135,6 +135,11 @@ trait GHU_Trait {
          */
         $timeout = apply_filters( 'github_updater_repo_cache_timeout', $timeout, $id, $response, $repo );
 
+        //PHP Deprecated:  Automatic conversion of false to array is deprecated
+        if (!is_array($this->response)) {
+            $this->response = [];
+        }
+
         $this->response['timeout'] = strtotime( $timeout );
         $this->response[ $id ]     = $response;
 
