@@ -1,5 +1,9 @@
 #### [unreleased]
 
+#### 9.9.25 / 2025-10-29
+
+* removed caller from Singleton (solves PHP 8.3 warnings)
+
 #### 9.9.24 / 2025-01-06
 
 * Response array workaround.

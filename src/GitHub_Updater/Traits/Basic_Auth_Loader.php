@@ -244,8 +244,10 @@ trait Basic_Auth_Loader {
         // In case $type set from Base::$caller doesn't match.
         if ( ! $slug && isset( $headers['path'] ) ) {
             $path_arr = explode( '/', $headers['path'] );
+
             foreach ( $path_arr as $key ) {
                 $key = basename( rawurldecode( $key ) ); // For GitLab.
+
                 if ( ! empty( $options[ $key ] ) || array_key_exists( $key, $repos ) ) {
                     $slug = $key;
                     break;
