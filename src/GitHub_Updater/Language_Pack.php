@@ -48,6 +48,7 @@ class Language_Pack {
      * @param Language_Pack_API $api  Language_Pack_API object.
      */
     public function __construct( $repo, Language_Pack_API $api ) {
+        //cbxx FIXME Undefined property '$languages'
         if ( null === $repo->languages ) {
             return;
         }

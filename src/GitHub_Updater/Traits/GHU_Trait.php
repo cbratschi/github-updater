@@ -535,6 +535,7 @@ trait GHU_Trait {
             'RequiresPHP' => 'Requires PHP',
         ];
 
+        //cbxx FIXME Undefined property '$extra_headers'
         $all_headers = array_merge( ${"default_{$type}_headers"}, self::$extra_headers );
 
         return $all_headers;
