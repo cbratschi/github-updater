@@ -317,6 +317,8 @@ class Base {
             return false;
         }
 
+        //cbxx FIXME Creation of dynamic property Fragen\GitHub_Updater\Base::$plugin is deprecated
+        //cbxx FIXME Creation of dynamic property Fragen\GitHub_Updater\Base::$theme is deprecated
         $this->{$repo->type} = $repo;
         $this->set_defaults( $repo->type );
 
