@@ -1,5 +1,9 @@
 #### [unreleased]
 
+#### 9.9.26 / 2025-12-05
+
+* commented out dynamic property in Base.php
+
 #### 9.9.25 / 2025-10-29
 
 * removed caller from Singleton (solves PHP 8.3 warnings)

@@ -317,9 +317,10 @@ class Base {
             return false;
         }
 
-        //cbxx FIXME Creation of dynamic property Fragen\GitHub_Updater\Base::$plugin is deprecated
-        //cbxx FIXME Creation of dynamic property Fragen\GitHub_Updater\Base::$theme is deprecated
-        $this->{$repo->type} = $repo;
+        //cbxx this line causes 'Creation of dynamic property Fragen\GitHub_Updater\Base::$plugin is deprecated' and 'Creation of dynamic property Fragen\GitHub_Updater\Base::$theme is deprecated'.
+        //     TODO check removing this line has no side effects
+        //$this->{$repo->type} = $repo;
+
         $this->set_defaults( $repo->type );
 
         if ( $repo_api->get_remote_info( $file ) ) {
