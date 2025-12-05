@@ -1,5 +1,10 @@
 #### [unreleased]
 
+#### 9.9.27 / 2025-12-05
+
+* fixed root cause of dynamic $theme and $plugin properties
+* fixed undefined tested property
+
 #### 9.9.26 / 2025-12-05
 
 * commented out dynamic property in Base.php

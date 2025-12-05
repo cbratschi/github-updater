@@ -425,7 +425,7 @@ class Plugin {
                 'url'              => $plugin->uri,
                 'package'          => $plugin->download_link,
                 'icons'            => $plugin->icons,
-                'tested'           => $plugin->tested,
+                'tested'           => isset($plugin->tested) ? $plugin->tested:null,
                 'requires'         => $plugin->requires,
                 'requires_php'     => $plugin->requires_php,
                 'icons'            => $plugin->icons,

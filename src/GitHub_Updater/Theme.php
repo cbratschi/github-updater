@@ -686,7 +686,7 @@ class Theme {
                 'package'          => $theme->download_link,
                 'requires'         => $theme->requires,
                 'requires_php'     => $theme->requires_php,
-                'tested'           => $theme->tested,
+                'tested'           => isset($theme->tested) ? $theme->tested:null,
                 'branch'           => $theme->branch,
                 'branches'         => array_keys( $theme->branches ),
                 'type'             => "{$theme->git}-{$theme->type}",

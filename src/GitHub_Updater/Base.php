@@ -86,6 +86,20 @@ class Base {
     protected $config;
 
     /**
+     * Holds plugin data.
+     *
+     * @var stdClass
+     */
+    protected $plugin;
+
+    /**
+     * Holds theme data.
+     *
+     * @var stdClass
+     */
+    protected $theme;
+
+    /**
      * Rollback variable.
      *
      * @var string|bool
@@ -317,10 +331,7 @@ class Base {
             return false;
         }
 
-        //cbxx this line causes 'Creation of dynamic property Fragen\GitHub_Updater\Base::$plugin is deprecated' and 'Creation of dynamic property Fragen\GitHub_Updater\Base::$theme is deprecated'.
-        //     TODO check removing this line has no side effects
-        //$this->{$repo->type} = $repo;
-
+        $this->{$repo->type} = $repo;
         $this->set_defaults( $repo->type );
 
         if ( $repo_api->get_remote_info( $file ) ) {
