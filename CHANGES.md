@@ -1,5 +1,9 @@
 #### [unreleased]
 
+#### 9.9.28 / 2025-12-29
+
+* fixed PHP error in use_release_asset()
+
 #### 9.9.27 / 2025-12-05
 
 * fixed root cause of dynamic $theme and $plugin properties
