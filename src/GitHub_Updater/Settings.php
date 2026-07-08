@@ -602,7 +602,9 @@ class Settings {
         $options     = $this->get_class_vars( 'Base', 'options' );
         $name        = isset( $options[ $args['id'] ] ) ? esc_attr( $options[ $args['id'] ] ) : '';
         $type        = isset( $args['token'] ) ? 'password' : 'text';
-        $placeholder = isset( $args['placeholder'] ) ? 'username:password' : null;
+        $placeholder = isset( $args['placeholder'] )
+            ? ( is_string( $args['placeholder'] ) ? $args['placeholder'] : 'username:password' )
+            : null;
         ?>
         <label for="<?php esc_attr( $args['id'] ); ?>">
             <input class="ghu-callback-text" type="<?php esc_attr_e( $type ); ?>" id="<?php esc_attr( $args['id'] ); ?>" name="github_updater[<?php esc_attr_e( $args['id'] ); ?>]" value="<?php esc_attr_e( $name ); ?>" placeholder="<?php esc_attr_e( $placeholder ); ?>">

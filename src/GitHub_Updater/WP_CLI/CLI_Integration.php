@@ -56,7 +56,7 @@ class CLI_Integration extends WP_CLI_Command {
      *
      * [--token=<access_token>]
      * : GitHub, Bitbucket, GitLab, or Gitea access token if not already saved
-     * Bitbucket pseudo-token in format `username:password`
+     * Bitbucket Cloud API token in format `email:api_token`, or raw repository/workspace/project access token
      *
      * [--slug=<slug>]
      * : Optional string indicating the plugin slug
@@ -91,7 +91,7 @@ class CLI_Integration extends WP_CLI_Command {
      *
      *     wp plugin install-git https://github.com/afragen/my-plugin --branch=develop --github
      *
-     *     wp plugin install-git https://bitbucket.org/afragen/my-private-plugin --token=username:password
+     *     wp plugin install-git https://bitbucket.org/afragen/my-private-plugin --token=email:api_token
      *
      *     wp plugin install-git https://github.com/afragen/my-private-plugin --token=lks9823evalki
      *
@@ -127,7 +127,7 @@ class CLI_Integration extends WP_CLI_Command {
      *
      * [--token=<access_token>]
      * : GitHub, Bitbucket, GitLab, or Gitea access token if not already saved
-     * Bitbucket pseudo-token in format `username:password`
+     * Bitbucket Cloud API token in format `email:api_token`, or raw repository/workspace/project access token
      *
      * [--slug=<slug>]
      * : Optional string indicating the theme slug
@@ -162,7 +162,7 @@ class CLI_Integration extends WP_CLI_Command {
      *
      *     wp theme install-git https://bitbucket.org/afragen/my-theme --branch=develop --bitbucket
      *
-     *     wp theme install-git https://bitbucket.org/afragen/my-private-theme --token=username:password
+     *     wp theme install-git https://bitbucket.org/afragen/my-private-theme --token=email:api_token
      *
      *     wp theme install-git https://github.com/afragen/my-private-theme --token=lks9823evalki
      *

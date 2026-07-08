@@ -435,14 +435,14 @@ class Bitbucket_API extends API implements API_Interface {
         //@appamics.CB: always use the token
         add_settings_field(
             'bitbucket_token',
-            esc_html__( 'Bitbucket Pseudo-Token', 'github-updater' ),
+            esc_html__( 'Bitbucket Token', 'github-updater' ),
             [ Singleton::get_instance( 'Settings', $this ), 'token_callback_text' ],
             'github_updater_bitbucket_install_settings',
             'bitbucket_token',
             [
                 'id'          => 'bitbucket_access_token',
                 'token'       => true,
-                'placeholder' => true,
+                'placeholder' => 'email:api_token',
             ]
         );
 
@@ -471,7 +471,7 @@ class Bitbucket_API extends API implements API_Interface {
             Singleton::get_instance( 'Settings', $this ),
             'token_callback_text',
         ];
-        $setting_field['placeholder']     = true;
+        $setting_field['placeholder']     = 'email:api_token';
 
         return $setting_field;
     }
@@ -492,14 +492,14 @@ class Bitbucket_API extends API implements API_Interface {
      * Print the Bitbucket repo Settings text.
      */
     public function print_section_bitbucket_info() {
-        esc_html_e( 'Enter `username:password` if private repository. Don\'t forget the colon `:`.', 'github-updater' );
+        esc_html_e( 'Enter an Atlassian API token as `email:api_token`, or enter a raw Bitbucket repository/workspace/project access token.', 'github-updater' );
     }
 
     /**
      * Print the Bitbucket user/pass Settings text.
      */
     public function print_section_bitbucket_token() {
-        esc_html_e( 'Enter your personal Bitbucket username and password. It will automatically be converted to a pseudo-token.', 'github-updater' );
+        esc_html_e( 'Enter an Atlassian API token as `email:api_token`, or enter a raw Bitbucket repository/workspace/project access token. Bitbucket app passwords are deprecated.', 'github-updater' );
 
         //Bitbucket logo (FIXME missing CSS)
         //$icon = plugin_dir_url( dirname( __DIR__ ) ) . '../assets/bitbucket-logo.svg';
@@ -581,7 +581,7 @@ class Bitbucket_API extends API implements API_Interface {
             <input class="bitbucket_setting" type="text" style="width:50%;" id="bitbucket_access_token" name="bitbucket_access_token" value="">
             <br>
             <span class="description">
-                <?php esc_html_e( 'Enter Bitbucket access token (i.e. username:password or username:token).', 'github-updater' ); ?>
+                <?php esc_html_e( 'Enter an Atlassian API token as email:api_token, or a raw Bitbucket repository/workspace/project access token.', 'github-updater' ); ?>
             </span>
         </label>
         <?php

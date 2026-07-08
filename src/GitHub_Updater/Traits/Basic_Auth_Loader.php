@@ -82,14 +82,19 @@ trait Basic_Auth_Loader {
             }
 
             if ( 'bitbucket' === $credentials['type'] ) {
-                //Bitbucket basic auth (see https://developer.atlassian.com/server/bitbucket/how-tos/example-basic-authentication/)
+                // Bitbucket basic auth (see https://developer.atlassian.com/server/bitbucket/how-tos/example-basic-authentication/).
                 $token = $credentials['token'];
 
-                if (strpos($token, ':') === false) {
-                    //use access token (available since 2022)
-                    //FIXME not working: Token is invalid or not supported for this endpoint.
-                    //FIXME error: Download failed. Too many redirects
-                    $args['headers']['Authorization'] = 'Bearer ' . $token;
+                if ( false === strpos( $token, ':' ) ) {
+                    $bitbucket_host = parse_url( $url, PHP_URL_HOST );
+
+                    if ( 'api.bitbucket.org' === $bitbucket_host ) {
+                        $args['headers']['Authorization'] = 'Bearer ' . $token;
+                    } else {
+                        // Repository/workspace/project access tokens use x-token-auth for Git-style downloads.
+                        // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+                        $args['headers']['Authorization'] = 'Basic ' . base64_encode( 'x-token-auth:' . $token );
+                    }
                 } else {
                     // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
                     $args['headers']['Authorization'] = 'Basic ' . base64_encode( $token );

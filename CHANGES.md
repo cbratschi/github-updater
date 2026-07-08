@@ -1,5 +1,10 @@
 #### [unreleased]
 
+#### 9.9.29 / 2026-07-08
+
+* fixed Bitbucket Cloud package downloads for repository/workspace/project access tokens
+* updated Bitbucket token settings and WP-CLI help for Atlassian API token credentials
+
 #### 9.9.28 / 2025-12-29
 
 * fixed PHP error in use_release_asset()
