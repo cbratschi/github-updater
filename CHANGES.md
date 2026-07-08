@@ -1,5 +1,9 @@
 #### [unreleased]
 
+#### 9.9.30 / 2026-07-09
+
+* fixed Bitbucket authentication lookup for single theme updates
+
 #### 9.9.29 / 2026-07-08
 
 * fixed Bitbucket Cloud package downloads for repository/workspace/project access tokens

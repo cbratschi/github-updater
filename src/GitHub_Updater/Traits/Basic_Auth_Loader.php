@@ -219,6 +219,7 @@ trait Basic_Auth_Loader {
         // phpcs:disable WordPress.Security.NonceVerification.Recommended
         $slug = isset( $_REQUEST['slug'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['slug'] ) ) : false;
         $slug = ! $slug && isset( $_REQUEST['plugin'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['plugin'] ) ) : $slug;
+        $slug = ! $slug && isset( $_REQUEST['theme'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['theme'] ) ) : $slug;
 
         // Some installers, like TGMPA, pass an array.
         $slug = is_array( $slug ) ? array_pop( $slug ) : $slug;
