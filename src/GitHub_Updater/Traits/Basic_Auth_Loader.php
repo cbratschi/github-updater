@@ -387,6 +387,8 @@ trait Basic_Auth_Loader {
             return $direct;
         }
 
+        $this->log_bitbucket_cloud_archive_fallback( $package, $direct );
+
         return $this->download_bitbucket_cloud_source_archive( $package );
     }
 
@@ -407,6 +409,7 @@ trait Basic_Auth_Loader {
             );
         }
 
+        $auth_method = $this->get_bitbucket_cloud_archive_auth_method( $credentials['token'] );
         $response = wp_remote_get(
             $package,
             [
@@ -419,6 +422,12 @@ trait Basic_Auth_Loader {
         );
 
         if ( is_wp_error( $response ) ) {
+            $response->add_data(
+                [
+                    'auth_method' => $auth_method,
+                ],
+                $response->get_error_code()
+            );
             $this->delete_file( $zip_file );
 
             return $response;
@@ -426,6 +435,13 @@ trait Basic_Auth_Loader {
 
         $code = (int) wp_remote_retrieve_response_code( $response );
         if ( 200 !== $code ) {
+            $error_data = [
+                'auth_method'  => $auth_method,
+                'status'       => $code,
+                'content_type' => $this->get_bitbucket_cloud_archive_response_header( $response, 'content-type' ),
+                'location'     => $this->get_bitbucket_cloud_archive_response_header( $response, 'location' ),
+                'body'         => $this->get_bitbucket_cloud_archive_error_body( $response, $zip_file ),
+            ];
             $this->delete_file( $zip_file );
 
             return new \WP_Error(
@@ -434,11 +450,23 @@ trait Basic_Auth_Loader {
                     /* translators: %d: HTTP status code */
                     __( 'Bitbucket archive download failed with HTTP status %d.', 'github-updater' ),
                     $code
-                )
+                ),
+                $error_data
             );
         }
 
         return $zip_file;
+    }
+
+    /**
+     * Get Bitbucket Cloud web archive authentication method.
+     *
+     * @param string $token Bitbucket token.
+     *
+     * @return string
+     */
+    private function get_bitbucket_cloud_archive_auth_method( $token ) {
+        return false === strpos( $token, ':' ) ? 'bearer' : 'basic';
     }
 
     /**
@@ -459,6 +487,75 @@ trait Basic_Auth_Loader {
             // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
             'Authorization' => 'Basic ' . base64_encode( $token ),
         ];
+    }
+
+    /**
+     * Get a response header for Bitbucket Cloud archive diagnostics.
+     *
+     * @param array  $response HTTP response.
+     * @param string $header   Header name.
+     *
+     * @return string
+     */
+    private function get_bitbucket_cloud_archive_response_header( $response, $header ) {
+        $value = wp_remote_retrieve_header( $response, $header );
+
+        if ( is_array( $value ) ) {
+            return implode( ', ', array_map( 'strval', $value ) );
+        }
+
+        return is_scalar( $value ) ? (string) $value : '';
+    }
+
+    /**
+     * Get a safe response body snippet for Bitbucket Cloud archive diagnostics.
+     *
+     * @param array  $response HTTP response.
+     * @param string $file     Streamed response file.
+     *
+     * @return string
+     */
+    private function get_bitbucket_cloud_archive_error_body( $response, $file ) {
+        $content_type = strtolower( $this->get_bitbucket_cloud_archive_response_header( $response, 'content-type' ) );
+
+        if ( '' !== $content_type && 1 !== preg_match( '#(json|text|html|xml)#', $content_type ) ) {
+            return '';
+        }
+
+        $body = wp_remote_retrieve_body( $response );
+        if ( '' === $body && is_string( $file ) && file_exists( $file ) ) {
+            $contents = file_get_contents( $file, false, null, 0, 1000 );
+            $body     = false !== $contents ? $contents : '';
+        }
+
+        $body = preg_replace( '/\s+/', ' ', trim( strip_tags( (string) $body ) ) );
+
+        return is_string( $body ) ? substr( $body, 0, 500 ) : '';
+    }
+
+    /**
+     * Log Bitbucket Cloud archive fallback diagnostics.
+     *
+     * @param string    $package Bitbucket Cloud archive URL.
+     * @param \WP_Error $error   Direct archive download error.
+     *
+     * @return void
+     */
+    private function log_bitbucket_cloud_archive_fallback( $package, $error ) {
+        $data = is_wp_error( $error ) && is_array( $error->get_error_data() ) ? $error->get_error_data() : [];
+        $log  = array_merge(
+            [
+                'event'         => 'bitbucket_archive_direct_failed',
+                'package'       => $package,
+                'error_code'    => is_wp_error( $error ) ? $error->get_error_code() : '',
+                'error_message' => is_wp_error( $error ) ? $error->get_error_message() : '',
+                'fallback'      => 'source_api_zip_builder',
+            ],
+            $data
+        );
+
+        // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+        error_log( 'GitHub Updater: ' . json_encode( $log ) );
     }
 
     /**

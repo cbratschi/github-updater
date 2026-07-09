@@ -1,5 +1,9 @@
 #### [unreleased]
 
+#### 9.9.37 / 2026-07-09
+
+* added diagnostics for slow Bitbucket Cloud archive fallback downloads
+
 #### 9.9.36 / 2026-07-09
 
 * fixed private Bitbucket Cloud archive downloads to use bearer authentication
