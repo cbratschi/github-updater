@@ -1,0 +1,4 @@
+interface:
+  display_name: "GitHub Updater Maintenance"
+  short_description: "Maintain this WordPress updater fork"
+  default_prompt: "Use $github-updater-maintenance to update, test, or release this GitHub Updater fork."
