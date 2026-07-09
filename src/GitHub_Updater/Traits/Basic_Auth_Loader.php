@@ -49,8 +49,16 @@ trait Basic_Auth_Loader {
      * @return bool|\WP_Error|string
      */
     public function pre_download_package( $reply, $package, $_upgrader = null, $_hook_extra = null ) {
-        if ( false !== $reply ) {
+        if ( false !== $reply || ! is_string( $package ) ) {
             return $reply;
+        }
+
+        if ( $this->is_bitbucket_cloud_archive_url( $package ) ) {
+            $credentials = $this->get_credentials( $package );
+
+            if ( 'bitbucket' === $credentials['type'] && ! $credentials['enterprise'] && ! empty( $credentials['token'] ) ) {
+                return $this->download_bitbucket_cloud_archive( $package, $credentials );
+            }
         }
 
         add_filter( 'http_request_args', [ $this, 'download_package' ], 15, 2 );
@@ -342,5 +350,496 @@ trait Basic_Auth_Loader {
         }
 
         return $args;
+    }
+
+    /**
+     * Check whether a URL is a Bitbucket Cloud archive URL.
+     *
+     * @param string $url URL.
+     *
+     * @return bool
+     */
+    private function is_bitbucket_cloud_archive_url( $url ) {
+        $headers = parse_url( $url );
+
+        if ( ! is_array( $headers ) || 'bitbucket.org' !== ( isset( $headers['host'] ) ? $headers['host'] : '' ) ) {
+            return false;
+        }
+
+        $path = isset( $headers['path'] ) ? trim( $headers['path'], '/' ) : '';
+
+        return 1 === preg_match( '#^[^/]+/[^/]+/get/.+\.zip$#', $path );
+    }
+
+    /**
+     * Download an authenticated Bitbucket Cloud archive.
+     *
+     * @param string $package     Bitbucket Cloud archive URL.
+     * @param array  $credentials Repository credentials.
+     *
+     * @return string|\WP_Error Local zip path or error.
+     */
+    private function download_bitbucket_cloud_archive( $package, $credentials ) {
+        $this->extend_bitbucket_cloud_download_time_limit();
+
+        $direct = $this->download_bitbucket_cloud_archive_direct( $package, $credentials );
+        if ( ! is_wp_error( $direct ) ) {
+            return $direct;
+        }
+
+        return $this->download_bitbucket_cloud_source_archive( $package );
+    }
+
+    /**
+     * Download a Bitbucket Cloud archive directly from the web archive endpoint.
+     *
+     * @param string $package     Bitbucket Cloud archive URL.
+     * @param array  $credentials Repository credentials.
+     *
+     * @return string|\WP_Error Local zip path or error.
+     */
+    private function download_bitbucket_cloud_archive_direct( $package, $credentials ) {
+        $zip_file = wp_tempnam( $package );
+        if ( ! $zip_file ) {
+            return new \WP_Error(
+                'github_updater_bitbucket_temp_file',
+                __( 'Could not create a temporary file for the Bitbucket archive.', 'github-updater' )
+            );
+        }
+
+        $response = wp_remote_get(
+            $package,
+            [
+                'timeout'     => 300,
+                'redirection' => 5,
+                'stream'      => true,
+                'filename'    => $zip_file,
+                'headers'     => $this->get_bitbucket_cloud_archive_headers( $credentials['token'] ),
+            ]
+        );
+
+        if ( is_wp_error( $response ) ) {
+            $this->delete_file( $zip_file );
+
+            return $response;
+        }
+
+        $code = (int) wp_remote_retrieve_response_code( $response );
+        if ( 200 !== $code ) {
+            $this->delete_file( $zip_file );
+
+            return new \WP_Error(
+                'github_updater_bitbucket_archive_response',
+                sprintf(
+                    /* translators: %d: HTTP status code */
+                    __( 'Bitbucket archive download failed with HTTP status %d.', 'github-updater' ),
+                    $code
+                )
+            );
+        }
+
+        return $zip_file;
+    }
+
+    /**
+     * Get Bitbucket Cloud web archive authentication headers.
+     *
+     * @param string $token Bitbucket token.
+     *
+     * @return array
+     */
+    private function get_bitbucket_cloud_archive_headers( $token ) {
+        $basic_token = false === strpos( $token, ':' ) ? 'x-token-auth:' . $token : $token;
+
+        return [
+            // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+            'Authorization' => 'Basic ' . base64_encode( $basic_token ),
+        ];
+    }
+
+    /**
+     * Build a local zip from the Bitbucket Cloud source API.
+     *
+     * @param string $package Bitbucket Cloud archive URL.
+     *
+     * @return string|\WP_Error Local zip path or error.
+     */
+    private function download_bitbucket_cloud_source_archive( $package ) {
+        $parts = $this->parse_bitbucket_cloud_archive_url( $package );
+        if ( ! $parts ) {
+            return new \WP_Error(
+                'github_updater_bitbucket_archive_url',
+                __( 'Invalid Bitbucket archive URL.', 'github-updater' )
+            );
+        }
+
+        $zip_file = wp_tempnam( $package );
+        if ( ! $zip_file ) {
+            return new \WP_Error(
+                'github_updater_bitbucket_temp_file',
+                __( 'Could not create a temporary file for the Bitbucket archive.', 'github-updater' )
+            );
+        }
+
+        $root = $parts['owner'] . '-' . $parts['repo'] . '-' . sanitize_file_name( $parts['ref'] ) . '/';
+
+        if ( class_exists( 'ZipArchive' ) ) {
+            return $this->download_bitbucket_cloud_source_archive_with_ziparchive( $zip_file, $parts, $root );
+        }
+
+        return $this->download_bitbucket_cloud_source_archive_with_pclzip( $zip_file, $parts, $root );
+    }
+
+    /**
+     * Build the Bitbucket Cloud source archive using ZipArchive.
+     *
+     * @param string $zip_file Local zip path.
+     * @param array  $parts    Archive URL parts.
+     * @param string $root     Zip root directory.
+     *
+     * @return string|\WP_Error Local zip path or error.
+     */
+    private function download_bitbucket_cloud_source_archive_with_ziparchive( $zip_file, $parts, $root ) {
+        $zip = new \ZipArchive();
+        if ( true !== $zip->open( $zip_file, \ZipArchive::OVERWRITE ) ) {
+            return new \WP_Error(
+                'github_updater_bitbucket_zip_open',
+                __( 'Could not open a temporary zip file for the Bitbucket archive.', 'github-updater' )
+            );
+        }
+
+        $result = $this->walk_bitbucket_source_files(
+            $parts,
+            function ( $path, $contents ) use ( $zip, $root ) {
+                if ( true !== $zip->addFromString( $root . $path, $contents ) ) {
+                    return new \WP_Error(
+                        'github_updater_bitbucket_zip_add',
+                        __( 'Could not add a Bitbucket source file to the archive.', 'github-updater' )
+                    );
+                }
+
+                return true;
+            }
+        );
+        $zip->close();
+
+        if ( is_wp_error( $result ) ) {
+            $this->delete_file( $zip_file );
+
+            return $result;
+        }
+
+        return $zip_file;
+    }
+
+    /**
+     * Build the Bitbucket Cloud source archive using WordPress' bundled PclZip.
+     *
+     * @param string $zip_file Local zip path.
+     * @param array  $parts    Archive URL parts.
+     * @param string $root     Zip root directory.
+     *
+     * @return string|\WP_Error Local zip path or error.
+     */
+    private function download_bitbucket_cloud_source_archive_with_pclzip( $zip_file, $parts, $root ) {
+        if ( ! class_exists( 'PclZip' ) && defined( 'ABSPATH' ) ) {
+            require_once ABSPATH . 'wp-admin/includes/class-pclzip.php';
+        }
+
+        if ( ! class_exists( 'PclZip' ) ) {
+            return new \WP_Error(
+                'github_updater_bitbucket_zip_support_missing',
+                __( 'Bitbucket archive download requires ZipArchive or WordPress PclZip support.', 'github-updater' )
+            );
+        }
+
+        $source_dir  = trailingslashit( get_temp_dir() ) . 'github-updater-bitbucket-' . uniqid( '', true );
+        $source_root = trailingslashit( $source_dir ) . rtrim( $root, '/' );
+
+        if ( ! wp_mkdir_p( $source_root ) ) {
+            return new \WP_Error(
+                'github_updater_bitbucket_temp_dir',
+                __( 'Could not create a temporary directory for the Bitbucket archive.', 'github-updater' )
+            );
+        }
+
+        $result = $this->walk_bitbucket_source_files(
+            $parts,
+            function ( $path, $contents ) use ( $source_root ) {
+                $target = trailingslashit( $source_root ) . $path;
+
+                if ( ! wp_mkdir_p( dirname( $target ) ) ) {
+                    return new \WP_Error(
+                        'github_updater_bitbucket_temp_dir',
+                        __( 'Could not create a temporary directory for a Bitbucket source file.', 'github-updater' )
+                    );
+                }
+
+                if ( false === file_put_contents( $target, $contents ) ) {
+                    return new \WP_Error(
+                        'github_updater_bitbucket_temp_file',
+                        __( 'Could not write a Bitbucket source file to the temporary archive directory.', 'github-updater' )
+                    );
+                }
+
+                return true;
+            }
+        );
+
+        if ( is_wp_error( $result ) ) {
+            $this->delete_directory( $source_dir );
+            $this->delete_file( $zip_file );
+
+            return $result;
+        }
+
+        $archive = new \PclZip( $zip_file );
+        $result  = $archive->create( $source_root, PCLZIP_OPT_REMOVE_PATH, $source_dir );
+
+        $this->delete_directory( $source_dir );
+
+        if ( 0 === $result ) {
+            $this->delete_file( $zip_file );
+
+            return new \WP_Error(
+                'github_updater_bitbucket_zip_create',
+                sprintf(
+                    /* translators: %s: PclZip error message */
+                    __( 'Could not create Bitbucket archive: %s', 'github-updater' ),
+                    $archive->errorInfo( true )
+                )
+            );
+        }
+
+        return $zip_file;
+    }
+
+    /**
+     * Parse a Bitbucket Cloud archive URL.
+     *
+     * @param string $package Bitbucket Cloud archive URL.
+     *
+     * @return array|false
+     */
+    private function parse_bitbucket_cloud_archive_url( $package ) {
+        $headers = parse_url( $package );
+        $path    = isset( $headers['path'] ) ? trim( $headers['path'], '/' ) : '';
+        $parts   = explode( '/', $path );
+
+        if ( count( $parts ) < 4 || 'get' !== $parts[2] ) {
+            return false;
+        }
+
+        $ref = implode( '/', array_slice( $parts, 3 ) );
+        if ( '.zip' === substr( $ref, -4 ) ) {
+            $ref = substr( $ref, 0, -4 );
+        }
+
+        return [
+            'owner' => rawurldecode( $parts[0] ),
+            'repo'  => rawurldecode( $parts[1] ),
+            'ref'   => rawurldecode( $ref ),
+        ];
+    }
+
+    /**
+     * Walk Bitbucket source files.
+     *
+     * @param array    $parts    Archive URL parts.
+     * @param callable $callback Callback to receive each file path and contents.
+     *
+     * @return bool|\WP_Error
+     */
+    private function walk_bitbucket_source_files( $parts, $callback ) {
+        $queue = [ '' ];
+
+        while ( ! empty( $queue ) ) {
+            $path = array_shift( $queue );
+            $url  = $this->get_bitbucket_source_url( $parts, $path );
+
+            do {
+                $response = $this->bitbucket_api_get( $url );
+                if ( is_wp_error( $response ) ) {
+                    return $response;
+                }
+
+                $code = (int) wp_remote_retrieve_response_code( $response );
+                if ( 200 !== $code ) {
+                    return new \WP_Error(
+                        'github_updater_bitbucket_api_response',
+                        sprintf(
+                            /* translators: %d: HTTP status code */
+                            __( 'Bitbucket API request failed with HTTP status %d.', 'github-updater' ),
+                            $code
+                        )
+                    );
+                }
+
+                $body = json_decode( wp_remote_retrieve_body( $response ) );
+                if ( ! is_object( $body ) || ! isset( $body->values ) || ! is_array( $body->values ) ) {
+                    return new \WP_Error(
+                        'github_updater_bitbucket_api_response',
+                        __( 'Bitbucket API returned an invalid source listing.', 'github-updater' )
+                    );
+                }
+
+                foreach ( $body->values as $entry ) {
+                    if ( ! is_object( $entry ) || empty( $entry->path ) || empty( $entry->type ) ) {
+                        continue;
+                    }
+
+                    if ( 'commit_directory' === $entry->type ) {
+                        $queue[] = $entry->path;
+                        continue;
+                    }
+
+                    $links = isset( $entry->links ) && is_object( $entry->links ) ? $entry->links : null;
+                    $self  = $links && isset( $links->self ) && is_object( $links->self ) ? $links->self : null;
+
+                    if ( 'commit_file' !== $entry->type || empty( $self->href ) ) {
+                        continue;
+                    }
+
+                    $file = $this->bitbucket_api_get( $self->href );
+                    if ( is_wp_error( $file ) ) {
+                        return $file;
+                    }
+
+                    $file_code = (int) wp_remote_retrieve_response_code( $file );
+                    if ( 200 !== $file_code ) {
+                        return new \WP_Error(
+                            'github_updater_bitbucket_api_response',
+                            sprintf(
+                                /* translators: %d: HTTP status code */
+                                __( 'Bitbucket API file request failed with HTTP status %d.', 'github-updater' ),
+                                $file_code
+                            )
+                        );
+                    }
+
+                    $result = call_user_func( $callback, $entry->path, wp_remote_retrieve_body( $file ) );
+                    if ( is_wp_error( $result ) ) {
+                        return $result;
+                    }
+                }
+
+                $url = ! empty( $body->next ) ? $body->next : null;
+            } while ( $url );
+        }
+
+        return true;
+    }
+
+    /**
+     * Get a Bitbucket Cloud source API URL.
+     *
+     * @param array  $parts Archive URL parts.
+     * @param string $path  Source path.
+     *
+     * @return string
+     */
+    private function get_bitbucket_source_url( $parts, $path ) {
+        $segments = [
+            '2.0',
+            'repositories',
+            rawurlencode( $parts['owner'] ),
+            rawurlencode( $parts['repo'] ),
+            'src',
+            $this->rawurlencode_path( $parts['ref'] ),
+        ];
+
+        if ( '' !== $path ) {
+            $segments[] = $this->rawurlencode_path( $path );
+        }
+
+        return add_query_arg(
+            [
+                'pagelen' => '100',
+                'fields'  => 'values.path,values.type,values.links.self.href,next',
+            ],
+            'https://api.bitbucket.org/' . implode( '/', $segments ) . '/'
+        );
+    }
+
+    /**
+     * Add authentication headers to a Bitbucket API request.
+     *
+     * @param string $url URL.
+     *
+     * @return array|\WP_Error
+     */
+    private function bitbucket_api_get( $url ) {
+        $auth_header = $this->add_auth_header( [ 'headers' => [] ], $url );
+        $args        = array_merge(
+            [
+                'timeout' => 30,
+            ],
+            $auth_header
+        );
+
+        return wp_remote_get( $url, $args );
+    }
+
+    /**
+     * URL-encode each path segment without encoding slashes.
+     *
+     * @param string $path Path.
+     *
+     * @return string
+     */
+    private function rawurlencode_path( $path ) {
+        return implode( '/', array_map( 'rawurlencode', explode( '/', $path ) ) );
+    }
+
+    /**
+     * Extend the time available to build authenticated Bitbucket packages.
+     *
+     * @return void
+     */
+    private function extend_bitbucket_cloud_download_time_limit() {
+        if ( function_exists( 'set_time_limit' ) ) {
+            @set_time_limit( 300 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+        }
+    }
+
+    /**
+     * Delete a file if it exists.
+     *
+     * @param string $file File path.
+     *
+     * @return void
+     */
+    private function delete_file( $file ) {
+        if ( is_string( $file ) && file_exists( $file ) ) {
+            unlink( $file );
+        }
+    }
+
+    /**
+     * Delete a directory tree.
+     *
+     * @param string $dir Directory.
+     *
+     * @return void
+     */
+    private function delete_directory( $dir ) {
+        if ( ! is_dir( $dir ) ) {
+            return;
+        }
+
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator( $dir, \FilesystemIterator::SKIP_DOTS ),
+            \RecursiveIteratorIterator::CHILD_FIRST
+        );
+
+        foreach ( $iterator as $file ) {
+            if ( $file->isDir() ) {
+                rmdir( $file->getPathname() );
+            } else {
+                unlink( $file->getPathname() );
+            }
+        }
+
+        rmdir( $dir );
     }
 }

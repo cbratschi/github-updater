@@ -13,6 +13,7 @@ const DISABLE_WP_CRON = false;
 const DOING_AJAX = false;
 const GITHUB_UPDATER_OVERRIDE_DOT_ORG = false;
 const HOUR_IN_SECONDS = 3600;
+const PCLZIP_OPT_REMOVE_PATH = 77003;
 const REST_REQUEST = false;
 const WP_CLI = false;
 const WP_CONTENT_DIR = '';
@@ -172,6 +173,20 @@ if ( false ) {
         }
     }
 
+    class PclZip {
+        public function __construct( ...$args ) {
+            github_updater_intelephense_mixed( ...$args );
+        }
+
+        public function create( ...$args ) {
+            return github_updater_intelephense_mixed( ...$args );
+        }
+
+        public function errorInfo( ...$args ) {
+            return github_updater_intelephense_mixed( ...$args );
+        }
+    }
+
     function __( ...$args ) { return github_updater_intelephense_mixed( ...$args ); }
     function _cleanup_header_comment( ...$args ) { return github_updater_intelephense_mixed( ...$args ); }
     function _get_cron_array( ...$args ) { return github_updater_intelephense_mixed( ...$args ); }
@@ -216,6 +231,7 @@ if ( false ) {
     function get_site_option( ...$args ) { return github_updater_intelephense_mixed( ...$args ); }
     function get_site_transient( ...$args ) { return github_updater_intelephense_mixed( ...$args ); }
     function get_stylesheet_directory( ...$args ) { return github_updater_intelephense_mixed( ...$args ); }
+    function get_temp_dir( ...$args ) { return github_updater_intelephense_mixed( ...$args ); }
     function get_theme_root( ...$args ) { return github_updater_intelephense_mixed( ...$args ); }
     function home_url( ...$args ) { return github_updater_intelephense_mixed( ...$args ); }
     function is_admin( ...$args ) { return github_updater_intelephense_mixed( ...$args ); }
@@ -260,6 +276,7 @@ if ( false ) {
     function wp_kses_post( ...$args ) { return github_updater_intelephense_mixed( ...$args ); }
     function wp_next_scheduled( ...$args ) { return github_updater_intelephense_mixed( ...$args ); }
     function wp_nonce_url( ...$args ) { return github_updater_intelephense_mixed( ...$args ); }
+    function wp_mkdir_p( ...$args ) { return github_updater_intelephense_mixed( ...$args ); }
     function wp_rand( ...$args ) { return github_updater_intelephense_mixed( ...$args ); }
     function wp_register_script( ...$args ) { return github_updater_intelephense_mixed( ...$args ); }
     function wp_register_style( ...$args ) { return github_updater_intelephense_mixed( ...$args ); }
@@ -271,6 +288,7 @@ if ( false ) {
     function wp_schedule_single_event( ...$args ) { return github_updater_intelephense_mixed( ...$args ); }
     function wp_send_json_error( ...$args ) { return github_updater_intelephense_mixed( ...$args ); }
     function wp_send_json_success( ...$args ) { return github_updater_intelephense_mixed( ...$args ); }
+    function wp_tempnam( ...$args ) { return github_updater_intelephense_mixed( ...$args ); }
     function wp_unschedule_event( ...$args ) { return github_updater_intelephense_mixed( ...$args ); }
     function wp_unslash( ...$args ) { return github_updater_intelephense_mixed( ...$args ); }
 }
