@@ -14,7 +14,6 @@ const DOING_AJAX = false;
 const GITHUB_UPDATER_OVERRIDE_DOT_ORG = false;
 const HOUR_IN_SECONDS = 3600;
 const REST_REQUEST = false;
-const PCLZIP_OPT_REMOVE_PATH = 77003;
 const WP_CLI = false;
 const WP_CONTENT_DIR = '';
 const WP_DEBUG = false;
@@ -173,20 +172,6 @@ if ( false ) {
         }
     }
 
-    class PclZip {
-        public function __construct( ...$args ) {
-            github_updater_intelephense_mixed( ...$args );
-        }
-
-        public function create( ...$args ) {
-            return github_updater_intelephense_mixed( ...$args );
-        }
-
-        public function errorInfo( ...$args ) {
-            return github_updater_intelephense_mixed( ...$args );
-        }
-    }
-
     function __( ...$args ) { return github_updater_intelephense_mixed( ...$args ); }
     function _cleanup_header_comment( ...$args ) { return github_updater_intelephense_mixed( ...$args ); }
     function _get_cron_array( ...$args ) { return github_updater_intelephense_mixed( ...$args ); }
@@ -225,7 +210,6 @@ if ( false ) {
     function get_available_languages( ...$args ) { return github_updater_intelephense_mixed( ...$args ); }
     function get_bloginfo( ...$args ) { return github_updater_intelephense_mixed( ...$args ); }
     function get_file_data( ...$args ) { return github_updater_intelephense_mixed( ...$args ); }
-    function get_temp_dir( ...$args ) { return github_updater_intelephense_mixed( ...$args ); }
     function get_locale( ...$args ) { return github_updater_intelephense_mixed( ...$args ); }
     function get_plugin_data( ...$args ) { return github_updater_intelephense_mixed( ...$args ); }
     function get_plugins( ...$args ) { return github_updater_intelephense_mixed( ...$args ); }
@@ -276,11 +260,9 @@ if ( false ) {
     function wp_kses_post( ...$args ) { return github_updater_intelephense_mixed( ...$args ); }
     function wp_next_scheduled( ...$args ) { return github_updater_intelephense_mixed( ...$args ); }
     function wp_nonce_url( ...$args ) { return github_updater_intelephense_mixed( ...$args ); }
-    function wp_mkdir_p( ...$args ) { return github_updater_intelephense_mixed( ...$args ); }
     function wp_rand( ...$args ) { return github_updater_intelephense_mixed( ...$args ); }
     function wp_register_script( ...$args ) { return github_updater_intelephense_mixed( ...$args ); }
     function wp_register_style( ...$args ) { return github_updater_intelephense_mixed( ...$args ); }
-    function wp_tempnam( ...$args ) { return github_updater_intelephense_mixed( ...$args ); }
     function wp_remote_get( ...$args ) { return github_updater_intelephense_mixed( ...$args ); }
     function wp_remote_head( ...$args ) { return github_updater_intelephense_mixed( ...$args ); }
     function wp_remote_retrieve_body( ...$args ) { return github_updater_intelephense_mixed( ...$args ); }

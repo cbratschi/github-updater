@@ -1,5 +1,10 @@
 #### [unreleased]
 
+#### 9.9.33 / 2026-07-09
+
+* fixed authenticated Bitbucket Cloud package downloads timing out during updates
+* fixed PHP deprecation warning in settings redirects
+
 #### 9.9.32 / 2026-07-09
 
 * fixed authenticated Bitbucket Cloud package downloads for private updates
