@@ -1,5 +1,10 @@
 #### [unreleased]
 
+#### 9.9.36 / 2026-07-09
+
+* fixed private Bitbucket Cloud archive downloads to use bearer authentication
+* improved fallback archive generation for Bitbucket Cloud source downloads
+
 #### 9.9.35 / 2026-07-09
 
 * fixed private Bitbucket Cloud archive updates using repository access tokens

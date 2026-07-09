@@ -449,11 +449,15 @@ trait Basic_Auth_Loader {
      * @return array
      */
     private function get_bitbucket_cloud_archive_headers( $token ) {
-        $basic_token = false === strpos( $token, ':' ) ? 'x-token-auth:' . $token : $token;
+        if ( false === strpos( $token, ':' ) ) {
+            return [
+                'Authorization' => 'Bearer ' . $token,
+            ];
+        }
 
         return [
             // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
-            'Authorization' => 'Basic ' . base64_encode( $basic_token ),
+            'Authorization' => 'Basic ' . base64_encode( $token ),
         ];
     }
 
@@ -651,11 +655,32 @@ trait Basic_Auth_Loader {
      * @return bool|\WP_Error
      */
     private function walk_bitbucket_source_files( $parts, $callback ) {
+        $recursive_depth = 20;
+        $result          = $this->walk_bitbucket_source_file_list( $parts, $callback, $recursive_depth );
+
+        if ( is_wp_error( $result ) && 'github_updater_bitbucket_api_timeout' === $result->get_error_code() ) {
+            return $this->walk_bitbucket_source_file_list( $parts, $callback );
+        }
+
+        return $result;
+    }
+
+    /**
+     * Walk Bitbucket source files using an optional recursive listing depth.
+     *
+     * @param array    $parts     Archive URL parts.
+     * @param callable $callback  Callback to receive each file path and contents.
+     * @param int      $max_depth Recursive listing depth for the root path.
+     *
+     * @return bool|\WP_Error
+     */
+    private function walk_bitbucket_source_file_list( $parts, $callback, $max_depth = 0 ) {
         $queue = [ '' ];
 
         while ( ! empty( $queue ) ) {
-            $path = array_shift( $queue );
-            $url  = $this->get_bitbucket_source_url( $parts, $path );
+            $path          = array_shift( $queue );
+            $current_depth = '' === $path ? $max_depth : 0;
+            $url           = $this->get_bitbucket_source_url( $parts, $path, $current_depth );
 
             do {
                 $response = $this->bitbucket_api_get( $url );
@@ -666,7 +691,7 @@ trait Basic_Auth_Loader {
                 $code = (int) wp_remote_retrieve_response_code( $response );
                 if ( 200 !== $code ) {
                     return new \WP_Error(
-                        'github_updater_bitbucket_api_response',
+                        555 === $code ? 'github_updater_bitbucket_api_timeout' : 'github_updater_bitbucket_api_response',
                         sprintf(
                             /* translators: %d: HTTP status code */
                             __( 'Bitbucket API request failed with HTTP status %d.', 'github-updater' ),
@@ -689,7 +714,9 @@ trait Basic_Auth_Loader {
                     }
 
                     if ( 'commit_directory' === $entry->type ) {
-                        $queue[] = $entry->path;
+                        if ( 0 === $current_depth || $this->is_bitbucket_source_boundary_directory( $entry->path, $current_depth ) ) {
+                            $queue[] = $entry->path;
+                        }
                         continue;
                     }
 
@@ -731,14 +758,29 @@ trait Basic_Auth_Loader {
     }
 
     /**
+     * Check whether a directory sits on the recursive listing boundary.
+     *
+     * @param string $path      Directory path.
+     * @param int    $max_depth Recursive listing depth.
+     *
+     * @return bool
+     */
+    private function is_bitbucket_source_boundary_directory( $path, $max_depth ) {
+        $path_depth = substr_count( trim( $path, '/' ), '/' ) + 1;
+
+        return $path_depth >= $max_depth;
+    }
+
+    /**
      * Get a Bitbucket Cloud source API URL.
      *
-     * @param array  $parts Archive URL parts.
-     * @param string $path  Source path.
+     * @param array  $parts     Archive URL parts.
+     * @param string $path      Source path.
+     * @param int    $max_depth Recursive listing depth.
      *
      * @return string
      */
-    private function get_bitbucket_source_url( $parts, $path ) {
+    private function get_bitbucket_source_url( $parts, $path, $max_depth = 0 ) {
         $segments = [
             '2.0',
             'repositories',
@@ -752,11 +794,17 @@ trait Basic_Auth_Loader {
             $segments[] = $this->rawurlencode_path( $path );
         }
 
+        $query = [
+            'pagelen' => '100',
+            'fields'  => 'values.path,values.type,values.links.self.href,next',
+        ];
+
+        if ( $max_depth > 0 ) {
+            $query['max_depth'] = (string) $max_depth;
+        }
+
         return add_query_arg(
-            [
-                'pagelen' => '100',
-                'fields'  => 'values.path,values.type,values.links.self.href,next',
-            ],
+            $query,
             'https://api.bitbucket.org/' . implode( '/', $segments ) . '/'
         );
     }
