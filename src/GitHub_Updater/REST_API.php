@@ -134,7 +134,7 @@ class REST_API {
 	 *
 	 * @param \WP_REST_Request $request REST API response.
 	 *
-	 * @return string
+	 * @return array
 	 */
 	public function get_remote_repo_data( \WP_REST_Request $request ) {
 		// Test for API key and exit if incorrect.
@@ -145,6 +145,7 @@ class REST_API {
 		$ghu_themes  = Singleton::get_instance( 'Theme', $this )->get_theme_configs();
 		$ghu_tokens  = array_merge( $ghu_plugins, $ghu_themes );
 
+		$slugs   = [];
 		$site    = $request->get_header( 'host' );
 		$api_url = add_query_arg(
 			[
@@ -153,6 +154,10 @@ class REST_API {
 			home_url( 'wp-json/' . self::$namespace . '/update/' )
 		);
 		foreach ( $ghu_tokens as $token ) {
+			if ( ! is_object( $token ) || ! isset( $token->slug, $token->type, $token->primary_branch, $token->branch, $token->local_version ) ) {
+				continue;
+			}
+
 			$slugs[] = [
 				'slug'           => $token->slug,
 				'type'           => $token->type,

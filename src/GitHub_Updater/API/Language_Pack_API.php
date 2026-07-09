@@ -29,7 +29,7 @@ class Language_Pack_API extends API {
 
         self::$method   = 'translation';
         $this->type     = $type;
-        $this->response = $this->get_repo_cache();
+        $this->response = (array) $this->get_repo_cache();
     }
 
     /**
@@ -45,13 +45,18 @@ class Language_Pack_API extends API {
         if ( ! $response ) {
             $response = $this->get_language_pack_json( $this->type->git, $headers, $response );
 
-            if ( $response ) {
+            if ( is_object( $response ) ) {
                 foreach ( $response as $locale ) {
+                    if ( ! is_object( $locale ) || empty( $locale->language ) ) {
+                        continue;
+                    }
                     $package = $this->process_language_pack_package( $this->type->git, $locale, $headers );
 
-                    $response->{$locale->language}->package = $package;
-                    $response->{$locale->language}->type    = $this->type->type;
-                    $response->{$locale->language}->version = $this->type->local_version;
+                    if ( isset( $response->{$locale->language} ) && is_object( $response->{$locale->language} ) ) {
+                        $response->{$locale->language}->package = $package;
+                        $response->{$locale->language}->type    = $this->type->type;
+                        $response->{$locale->language}->version = $this->type->local_version;
+                    }
                 }
 
                 $this->set_repo_cache( 'languages', $response );
@@ -114,7 +119,7 @@ class Language_Pack_API extends API {
      * Process $package for update transient.
      *
      * @param string $git     (github|bitbucket|gitlab|gitea).
-     * @param object $locale  Locale.
+     * @param \stdClass $locale Locale.
      * @param array  $headers Array of headers.
      *
      * @return array|null|string

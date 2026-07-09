@@ -14,6 +14,9 @@ use Fragen\Singleton;
 
 /**
  * Trait GHU_Trait
+ *
+ * @property \stdClass|null $type
+ * @property array $response
  */
 trait GHU_Trait {
     /**
@@ -84,7 +87,7 @@ trait GHU_Trait {
      */
     public function get_repo_cache( $repo = false ) {
         if ( ! $repo ) {
-            $repo = isset( $this->type->slug ) ? $this->type->slug : 'ghu';
+            $repo = $this->get_repo_cache_slug();
         }
         $cache_key = 'ghu-' . md5( $repo );
         $cache     = get_site_option( $cache_key );
@@ -117,7 +120,7 @@ trait GHU_Trait {
         $hours = $this->get_class_vars( 'API', 'hours' );
 
         if ( ! $repo ) {
-            $repo = isset( $this->type->slug ) ? $this->type->slug : 'ghu';
+            $repo = $this->get_repo_cache_slug();
         }
 
         $cache_key = 'ghu-' . md5( $repo );
@@ -135,8 +138,7 @@ trait GHU_Trait {
          */
         $timeout = apply_filters( 'github_updater_repo_cache_timeout', $timeout, $id, $response, $repo );
 
-        //PHP Deprecated:  Automatic conversion of false to array is deprecated
-        if (!is_array($this->response)) {
+        if ( ! is_array( $this->response ) ) {
             $this->response = [];
         }
 
@@ -146,6 +148,29 @@ trait GHU_Trait {
         update_site_option( $cache_key, $this->response );
 
         return true;
+    }
+
+    /**
+     * Get the current repo slug for cache keys.
+     *
+     * @return string
+     */
+    private function get_repo_cache_slug() {
+        $type_vars = $this->get_repo_type_vars();
+
+        return ! empty( $type_vars['slug'] ) ? $type_vars['slug'] : 'ghu';
+    }
+
+    /**
+     * Get repo type data when present on the current object.
+     *
+     * @return array
+     */
+    private function get_repo_type_vars() {
+        $object_vars = get_object_vars( $this );
+        $type        = isset( $object_vars['type'] ) ? $object_vars['type'] : null;
+
+        return is_object( $type ) || is_array( $type ) ? (array) $type : [];
     }
 
     /**
@@ -163,15 +188,18 @@ trait GHU_Trait {
             return false;
         }
         $property = $reflection_obj->getProperty( $var );
-        $property->setAccessible( true );
+        if ( \PHP_VERSION_ID < 80100 ) {
+            $set_accessible = 'setAccessible';
+            $property->$set_accessible( true );
+        }
 
         return $property->getValue( $class );
     }
 
     /**
-     * Returns static class variable $error_code.
+     * Returns API error codes.
      *
-     * @return array self::$error_code
+     * @return array
      */
     public function get_error_codes() {
         return $this->get_class_vars( 'API', 'error_code' );
@@ -242,7 +270,10 @@ trait GHU_Trait {
             return true;
         }
         if ( isset( $repo->remote_version ) && ! self::is_doing_ajax() ) {
-            return ( '0.0.0' === $repo->remote_version ) || ! empty( self::$options[ $repo->slug ] );
+            $options   = property_exists( static::class, 'options' ) && is_array( static::${'options'} ) ? static::${'options'} : [];
+            $repo_slug = is_object( $repo ) && property_exists( $repo, 'slug' ) ? $repo->slug : null;
+
+            return ( '0.0.0' === $repo->remote_version ) || ( null !== $repo_slug && ! empty( $options[ $repo_slug ] ) );
         }
 
         return false;
@@ -252,7 +283,7 @@ trait GHU_Trait {
      * Do we override dot org updates?
      *
      * @param string    $type (plugin|theme).
-     * @param \stdClass $repo Repository object.
+     * @param array|\stdClass $repo Repository data.
      *
      * @return bool
      */
@@ -260,7 +291,7 @@ trait GHU_Trait {
         // Correctly account for dashicon in Settings page.
         $icon           = is_array( $repo );
         $repo           = is_array( $repo ) ? (object) $repo : $repo;
-        $dot_org_master = ! $icon ? property_exists( $repo, 'dot_org' ) && $repo->dot_org && $repo->primary_branch === $repo->branch : true;
+        $dot_org_master = ! $icon ? is_object( $repo ) && property_exists( $repo, 'dot_org' ) && $repo->dot_org && $repo->primary_branch === $repo->branch : true;
 
         $transient_key = 'plugin' === $type ? $repo->file : null;
         $transient_key = 'theme' === $type ? $repo->slug : $transient_key;
@@ -273,7 +304,7 @@ trait GHU_Trait {
          * @return bool
          */
         $override = in_array( $transient_key, apply_filters( 'github_updater_override_dot_org', [] ), true );
-        $override = $override || $this->deprecate_override_constant();
+        $override = $override || $this->is_override_constant_set();
 
         // Set $override if set in Skip Updates plugin.
         if ( ! $override && \class_exists( '\\Fragen\\Skip_Updates\\Bootstrap' ) ) {
@@ -293,9 +324,19 @@ trait GHU_Trait {
      * Deprecated dot org override constant.
      *
      * @deprecated 8.5.0
+     *
      * @return bool
      */
     public function deprecate_override_constant() {
+        return $this->is_override_constant_set();
+    }
+
+    /**
+     * Is the deprecated dot org override constant set?
+     *
+     * @return bool
+     */
+    private function is_override_constant_set() {
         if ( defined( 'GITHUB_UPDATER_OVERRIDE_DOT_ORG' ) && GITHUB_UPDATER_OVERRIDE_DOT_ORG ) {
             // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
             error_log( 'GITHUB_UPDATER_OVERRIDE_DOT_ORG constant deprecated. Use `github_updater_override_dot_org` filter hook.' );
@@ -330,7 +371,7 @@ trait GHU_Trait {
      * Return an array of the running git servers.
      *
      * @access public
-     * @return array $gits
+     * @return array
      */
     public function get_running_git_servers() {
         $plugins = Singleton::get_instance( 'Plugin', $this )->get_plugin_configs();
@@ -392,7 +433,7 @@ trait GHU_Trait {
      *
      * @param string $repo_header Repo URL.
      *
-     * @return array $header
+     * @return array
      */
     protected function parse_header_uri( $repo_header ) {
         $header_parts         = parse_url( $repo_header );
@@ -458,7 +499,7 @@ trait GHU_Trait {
      * Fix name even if installed without renaming originally, eg <repo>-master
      *
      * @param string            $slug            Repo slug.
-     * @param Base|Plugin|Theme $upgrader_object Upgrader object.
+     * @param \Fragen\GitHub_Updater\Base|\Fragen\GitHub_Updater\Plugin|\Fragen\GitHub_Updater\Theme|null $upgrader_object Upgrader object.
      *
      * @return array
      */
@@ -535,10 +576,10 @@ trait GHU_Trait {
             'RequiresPHP' => 'Requires PHP',
         ];
 
-        //cbxx FIXME Undefined property '$extra_headers'
-        $all_headers = array_merge( ${"default_{$type}_headers"}, self::$extra_headers );
-
-        return $all_headers;
+        $default_headers = 'theme' === $type ? $default_theme_headers : $default_plugin_headers;
+        $extra_headers   = $this->get_class_vars( 'Base', 'extra_headers' );
+        $extra_headers   = is_array( $extra_headers ) ? $extra_headers : [];
+        return array_merge( $default_headers, $extra_headers );
     }
 
     /**
@@ -547,12 +588,11 @@ trait GHU_Trait {
      * @param string|array $contents File contents or array of file headers.
      * @param string       $type     plugin|theme.
      *
-     * @return array $all_headers Reduced array of all headers.
+     * @return array Reduced array of all headers.
      */
     public function get_file_headers( $contents, $type ) {
-        $all_headers = [];
-        $all_headers = $this->get_headers( $type );
-        $all_headers = array_unique( $all_headers );
+        $headers = $this->get_headers( $type );
+        $headers = array_unique( $headers );
 
         /*
          * Make sure we catch CR-only line endings.
@@ -560,21 +600,21 @@ trait GHU_Trait {
         if ( is_string( $contents ) ) {
             $file_data = str_replace( "\r", "\n", $contents );
 
-            foreach ( $all_headers as $field => $regex ) {
+            foreach ( $headers as $field => $regex ) {
                 if ( preg_match( '/^[ \t\/*#@]*' . preg_quote( $regex, '/' ) . ':(.*)$/mi', $file_data, $match ) && $match[1] ) {
-                    $all_headers[ $field ] = _cleanup_header_comment( $match[1] );
+                    $headers[ $field ] = _cleanup_header_comment( $match[1] );
                 } else {
-                    $all_headers[ $field ] = '';
+                    $headers[ $field ] = '';
                 }
             }
         }
 
-        $all_headers = is_array( $contents ) ? $contents : $all_headers;
+        $headers = is_array( $contents ) ? $contents : $headers;
 
         // Reduce array to only headers with data.
-        $all_headers = array_filter( $all_headers );
+        $headers = array_filter( $headers );
 
-        return $all_headers;
+        return $headers;
     }
 
     /**
@@ -583,14 +623,13 @@ trait GHU_Trait {
      * @param array           $header       Array of repo headers.
      * @param array|\WP_Theme $headers      Array of theme headers.
      * @param array           $header_parts Array of header parts.
-     * @param array           $repo_parts   Array of repo parts.
+     * @param array           $_repo_parts  Unused array of repo parts.
      *
-     * @return array $header
+     * @return array
      */
-    public function parse_extra_headers( $header, $headers, $header_parts, $repo_parts ) {
+    public function parse_extra_headers( $header, $headers, $header_parts, $_repo_parts ) {
         $extra_repo_headers = $this->get_class_vars( 'Base', 'extra_repo_headers' );
         $hosted_domains     = [ 'github.com', 'bitbucket.org', 'gitlab.com' ];
-        $theme              = null;
 
         $header['enterprise_uri'] = null;
         $header['enterprise_api'] = null;
@@ -657,10 +696,10 @@ trait GHU_Trait {
     /**
      * Check to see if wp-cron event is overdue by 24 hours and report error message.
      *
-     * @param array $cron      Array of WP-Cron events.
+     * @param array $_cron     Unused array of WP-Cron events.
      * @param int   $timestamp WP-Cron event timestamp.
      */
-    public function is_cron_overdue( $cron, $timestamp ) {
+    public function is_cron_overdue( $_cron, $timestamp ) {
         $overdue = ( ( time() - $timestamp ) / HOUR_IN_SECONDS ) > 24;
         if ( $overdue ) {
             $error_msg = esc_html__( 'There may be a problem with WP-Cron. A GitHub Updater WP-Cron event is overdue.', 'github-updater' );
@@ -761,12 +800,17 @@ trait GHU_Trait {
      * @return bool
      */
     public function use_release_asset( $branch_switch = false ) {
-        $is_tag                  = property_exists( $this->type, 'branches' ) ? $branch_switch && ! array_key_exists( $branch_switch, $this->type->branches ) : false;
-        $switch_master_tag       = $this->type->primary_branch === $branch_switch || $is_tag;
-        $current_master_noswitch = $this->type->primary_branch === $this->type->branch && false === $branch_switch;
+        $type                    = $this->get_repo_type_vars();
+        $branches                = ! empty( $type['branches'] ) && is_array( $type['branches'] ) ? $type['branches'] : [];
+        $primary_branch          = isset( $type['primary_branch'] ) ? $type['primary_branch'] : null;
+        $branch                  = isset( $type['branch'] ) ? $type['branch'] : null;
+        $newest_tag              = isset( $type['newest_tag'] ) ? $type['newest_tag'] : '0.0.0';
+        $is_tag                  = $branch_switch && ! empty( $branches ) && ! array_key_exists( $branch_switch, $branches );
+        $switch_master_tag       = $primary_branch === $branch_switch || $is_tag;
+        $current_master_noswitch = $primary_branch === $branch && false === $branch_switch;
 
         $need_release_asset = $switch_master_tag || $current_master_noswitch;
-        $use_release_asset  = $this->type->release_asset && '0.0.0' !== $this->type->newest_tag
+        $use_release_asset  = ! empty( $type['release_asset'] ) && '0.0.0' !== $newest_tag
             && $need_release_asset;
 
         return $use_release_asset;

@@ -61,7 +61,7 @@ class Settings {
      *
      * @var array $options
      */
-    private static $options;
+    private static $options = [];
 
     /**
      * Constructor.
@@ -170,7 +170,7 @@ class Settings {
          *
          * @param array $ghu_subtabs Array of added subtabs.
          *
-         * @return array $subtabs Array of subtabs.
+         * @return array Array of subtabs.
          */
         $ghu_subtabs = apply_filters( 'github_updater_add_settings_subtabs', $ghu_subtabs );
 
@@ -509,7 +509,7 @@ class Settings {
         $ghu_unset_keys = array_merge( $ghu_unset_keys, (array) $reset_keys );
 
         if ( ! empty( $ghu_unset_keys ) ) {
-            foreach ( $ghu_unset_keys as $key => $value ) {
+            foreach ( array_keys( $ghu_unset_keys ) as $key ) {
                 unset( self::$options[ $key ] );
             }
             update_site_option( 'github_updater', self::$options );
@@ -739,7 +739,7 @@ class Settings {
     private function refresh_transients() {
         // phpcs:disable WordPress.Security.NonceVerification.Recommended
         if ( isset( $_REQUEST['github_updater_refresh_transients'] ) ) {
-            $_POST = $_REQUEST;
+            $GLOBALS['_POST'] = $_REQUEST;
             // phpcs:enable
 
             return true;

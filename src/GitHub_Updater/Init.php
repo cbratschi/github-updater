@@ -126,7 +126,7 @@ class Init {
 
         // WP REST API has full capabilities.
         //@appamics.CB: added REST API
-        if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+        if ( $this->is_github_updater_rest_request() ) {
             return true;
         }
 
@@ -144,5 +144,27 @@ class Init {
         apply_filters_deprecated( 'github_updater_add_admin_pages', [ null ], '9.1.0' );
 
         return $can_user_update;
+    }
+
+    /**
+     * Check whether the current request targets GitHub Updater's REST endpoints.
+     *
+     * @return bool
+     */
+    private function is_github_updater_rest_request() {
+        if ( ! defined( 'REST_REQUEST' ) || ! REST_REQUEST ) {
+            return false;
+        }
+
+        $route = isset( $_REQUEST['rest_route'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['rest_route'] ) ) : '';
+        if ( 0 === strpos( $route, '/' . REST_API::$namespace . '/' ) ) {
+            return true;
+        }
+
+        $request_uri = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
+        $rest_prefix = function_exists( 'rest_get_url_prefix' ) ? rest_get_url_prefix() : 'wp-json';
+        $rest_path   = '/' . trim( $rest_prefix, '/' ) . '/' . REST_API::$namespace . '/';
+
+        return false !== strpos( $request_uri, $rest_path );
     }
 }

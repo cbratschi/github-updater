@@ -37,7 +37,7 @@ class API {
     /**
      * Holds HTTP error code from API call.
      *
-     * @var array ( $this->type->slug => $code )
+     * @var array Map of repo slug to error code data.
      */
     protected static $error_code = [];
 
@@ -46,14 +46,14 @@ class API {
      *
      * @var array $options
      */
-    protected static $options;
+    protected static $options = [];
 
     /**
      * Holds extra headers.
      *
      * @var array $extra_headers
      */
-    protected static $extra_headers;
+    protected static $extra_headers = [];
 
     /**
      * Variable for setting update transient hours.
@@ -72,6 +72,8 @@ class API {
 
     /**
      * Type.
+     *
+     * @var \stdClass|null
      */
     protected $type = null;
 
@@ -104,7 +106,7 @@ class API {
     /**
      * Add data in Settings page.
      *
-     * @param object $git Git API object.
+     * @param \Fragen\GitHub_Updater\API\API_Interface $git Git API object.
      */
     public function settings_hook( $git ) {
         add_action(
@@ -184,7 +186,7 @@ class API {
     /**
      * Add Install settings fields.
      *
-     * @param object $git Git API from caller.
+     * @param \Fragen\GitHub_Updater\API\API_Interface $git Git API from caller.
      */
     public function add_install_fields( $git ) {
         add_action(
@@ -241,7 +243,7 @@ class API {
             if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
                 $response_body = \json_decode( wp_remote_retrieve_body( $response ) );
 
-                if ( null !== $response_body && \property_exists( $response_body, 'message' ) ) {
+                if ( is_object( $response_body ) && \property_exists( $response_body, 'message' ) ) {
                     $log_message = "GitHub Updater Error: {$this->type->name} ({$this->type->slug}) - {$response_body->message}";
                     // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
                     error_log( $log_message );
@@ -257,10 +259,15 @@ class API {
         return json_decode( wp_remote_retrieve_body( $response ) );
     }
 
-    /**
-     * Perform a HTTP GET operation.
-     */
-    private function remote_get( $url, $args = [] ) {
+	/**
+	 * Perform a HTTP GET operation.
+	 *
+	 * @param string $url  Request URL.
+	 * @param array  $args Request arguments.
+	 *
+	 * @return array|\WP_Error
+	 */
+	private function remote_get( $url, $args = [] ) {
         $response = wp_remote_get( $url, $args );
 
         /*
@@ -276,10 +283,15 @@ class API {
         return $response;
     }
 
-    /**
-     * Perform HTTP HEAD operation.
-     */
-    private function remote_head( $url, $args = [] ) {
+	/**
+	 * Perform HTTP HEAD operation.
+	 *
+	 * @param string $url  Request URL.
+	 * @param array  $args Request arguments.
+	 *
+	 * @return array|\WP_Error
+	 */
+	private function remote_head( $url, $args = [] ) {
         $response = wp_remote_head( $url, $args );
 
         /*
@@ -299,7 +311,7 @@ class API {
      * Convert response body to JSON.
      *
      * @param  mixed $response (JSON|string).
-     * @return mixed $response JSON encoded.
+     * @return mixed JSON encoded.
      */
     private function convert_body_string_to_json( $response ) {
         if ( $this instanceof Gitea_API || $this instanceof Bitbucket_API || $this instanceof Bitbucket_Server_API || $this instanceof Gist_API ) {
@@ -321,8 +333,13 @@ class API {
      * @return array
      */
     protected function return_repo_type() {
-        $arr         = [];
-        $arr['type'] = $this->type->type;
+        $arr = [
+            'type'          => $this->type->type,
+            'git'           => '',
+            'base_uri'      => '',
+            'base_download' => '',
+            'base_raw'      => '',
+        ];
 
         switch ( $this->type->git ) {
             case 'github':
@@ -369,7 +386,7 @@ class API {
      * @param string      $endpoint      The endpoint to access.
      * @param bool|string $download_link The plugin or theme download link. Defaults to false.
      *
-     * @return string $endpoint
+     * @return string
      */
     protected function get_api_url( $endpoint, $download_link = false ) {
         $type     = $this->return_repo_type();
@@ -441,7 +458,9 @@ class API {
                 break;
 
             case 'gist':
-                $type['base_uri'] = $repo_api->add_endpoints( $this, $type );
+                if ( $repo_api instanceof Gist_API ) {
+                    $type['base_uri'] = $repo_api->add_endpoints( $this, $type );
+                }
                 break;
 
             default:
@@ -492,7 +511,7 @@ class API {
     /**
      * Test to exit early if no update available, saves API calls.
      *
-     * @param array|bool $response API response.
+     * @param array|bool|string|\stdClass|\WP_Error|null $response API response.
      * @param bool       $branch   Branch name.
      *
      * @return bool
@@ -521,7 +540,7 @@ class API {
      *
      * @access protected
      *
-     * @param \stdClass $response The response.
+     * @param array|bool|string|\stdClass|\WP_Error|null $response The response.
      *
      * @return bool true if invalid
      */

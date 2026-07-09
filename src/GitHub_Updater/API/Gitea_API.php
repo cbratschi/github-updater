@@ -41,7 +41,7 @@ class Gitea_API extends API implements API_Interface {
 	public function __construct( $type ) {
 		parent::__construct();
 		$this->type     = $type;
-		$this->response = $this->get_repo_cache();
+		$this->response = (array) $this->get_repo_cache();
 		$branch         = new Branch( $this->response );
 		if ( ! empty( $type->branch ) ) {
 			$this->type->branch = ! empty( $branch->cache['current_branch'] )
@@ -144,11 +144,11 @@ class Gitea_API extends API implements API_Interface {
 	}
 
 	/**
-	 * Construct $this->type->download_link using Gitea API.
+	 * Construct download link using Gitea API.
 	 *
 	 * @param boolean $branch_switch For direct branch changing.
 	 *
-	 * @return string $endpoint
+	 * @return string
 	 */
 	public function construct_download_link( $branch_switch = false ) {
 		self::$method       = 'download_link';
@@ -179,7 +179,7 @@ class Gitea_API extends API implements API_Interface {
 		 * @since 8.8.0
 		 *
 		 * @param string    $download_link Download URL.
-		 * @param /stdClass $this->type    Repository object.
+		 * @param \stdClass $type    Repository object.
 		 * @param string    $branch_switch Branch or tag for rollback or branch switching.
 		 */
 		return apply_filters( 'github_updater_post_construct_download_link', $download_link, $this->type, $branch_switch );
@@ -191,7 +191,7 @@ class Gitea_API extends API implements API_Interface {
 	 * @param Gitea_API|API $git      Git host API object.
 	 * @param string        $endpoint Endpoint.
 	 *
-	 * @return string $endpoint
+	 * @return string
 	 */
 	public function add_endpoints( $git, $endpoint ) {
 		switch ( $git::$method ) {
@@ -227,8 +227,12 @@ class Gitea_API extends API implements API_Interface {
 
 		$arr = [];
 		array_map(
-			function ( $e ) use ( &$arr ) {
-				$arr[] = $e->tag_name;
+				function ( $e ) use ( &$arr ) {
+					if ( ! is_object( $e ) || ! isset( $e->tag_name ) ) {
+						return $arr;
+					}
+
+					$arr[] = $e->tag_name;
 
 				return $arr;
 			},
@@ -243,7 +247,7 @@ class Gitea_API extends API implements API_Interface {
 	 *
 	 * @param \stdClass|array $response Response from API call.
 	 *
-	 * @return array $arr Array of meta variables.
+	 * @return array Array of meta variables.
 	 */
 	public function parse_meta_response( $response ) {
 		if ( $this->validate_response( $response ) ) {
@@ -271,7 +275,7 @@ class Gitea_API extends API implements API_Interface {
 	 *
 	 * @param \stdClass|array $response Response from API call.
 	 *
-	 * @return void|array|\stdClass $arr Array of changes in base64, object if error.
+	 * @return void|array|\stdClass Array of changes in base64, object if error.
 	 */
 	public function parse_changelog_response( $response ) {
 	}
@@ -279,7 +283,7 @@ class Gitea_API extends API implements API_Interface {
 	/**
 	 * Parse API response and return array of branch data.
 	 *
-	 * @param \stdClass $response API response.
+	 * @param array|\stdClass $response API response.
 	 *
 	 * @return array Array of branch data.
 	 */
@@ -290,9 +294,13 @@ class Gitea_API extends API implements API_Interface {
 		$response = is_string( $response ) ? [] : $response;
 		$branches = [];
 		foreach ( $response as $branch ) {
+			if ( ! is_object( $branch ) || ! isset( $branch->name, $branch->commit ) || ! is_object( $branch->commit ) ) {
+				continue;
+			}
+
 			$branches[ $branch->name ]['download']         = $this->construct_download_link( $branch->name );
-			$branches[ $branch->name ]['commit_hash']      = $branch->commit->id;
-			$branches[ $branch->name ]['commit_timestamp'] = $branch->commit->timestamp;
+			$branches[ $branch->name ]['commit_hash']      = isset( $branch->commit->id ) ? $branch->commit->id : null;
+			$branches[ $branch->name ]['commit_timestamp'] = isset( $branch->commit->timestamp ) ? $branch->commit->timestamp : null;
 		}
 
 		return $branches;
@@ -459,7 +467,7 @@ class Gitea_API extends API implements API_Interface {
 			&& empty( static::$options['gitea_access_token'] )
 			&& $auth_required['gitea']
 		) {
-			self::$error_code['gitea'] = [
+			static::$error_code['gitea'] = [
 				'git'   => 'gitea',
 				'error' => true,
 			];
@@ -482,11 +490,9 @@ class Gitea_API extends API implements API_Interface {
 	 * @param array $headers Array of headers.
 	 * @param array $install Array of install data.
 	 *
-	 * @return mixed $install
+	 * @return mixed
 	 */
 	public function remote_install( $headers, $install ) {
-		$options['gitea_access_token'] = isset( static::$options['gitea_access_token'] ) ? static::$options['gitea_access_token'] : null;
-
 		$base = $headers['base_uri'] . '/api/v1';
 
 		$install['download_link'] = "{$base}/repos/{$install['github_updater_repo']}/archive/{$install['github_updater_branch']}.zip";
@@ -498,10 +504,6 @@ class Gitea_API extends API implements API_Interface {
 			$install['options'][ $install['repo'] ]   = $install['gitea_access_token'];
 			$install['options']['gitea_access_token'] = $install['gitea_access_token'];
 		}
-
-		$token = ! empty( $install['options']['gitea_access_token'] )
-			? $install['options']['gitea_access_token']
-			: $options['gitea_access_token'];
 
 		if ( ! empty( static::$options['gitea_access_token'] ) ) {
 			unset( $install['options']['gitea_access_token'] );

@@ -38,7 +38,7 @@ class GitHub_API extends API implements API_Interface {
         parent::__construct();
 
         $this->type     = $type;
-        $this->response = $this->get_repo_cache();
+        $this->response = (array) $this->get_repo_cache();
         $branch         = new Branch( $this->response );
 
         if ( ! empty( $type->branch ) ) {
@@ -120,13 +120,13 @@ class GitHub_API extends API implements API_Interface {
     }
 
     /**
-     * Construct $this->type->download_link using Repository Contents API.
+     * Construct download link using Repository Contents API.
      *
      * @url http://developer.github.com/v3/repos/contents/#get-archive-link
      *
      * @param boolean $branch_switch for direct branch changing.
      *
-     * @return string $endpoint
+     * @return string
      */
     public function construct_download_link( $branch_switch = false ) {
         //Note: authentication needed for public repositories too
@@ -165,7 +165,7 @@ class GitHub_API extends API implements API_Interface {
          * @since 8.8.0
          *
          * @param string    $download_link Download URL.
-         * @param /stdClass $this->type    Repository object.
+         * @param \stdClass $type    Repository object.
          * @param string    $branch_switch Branch or tag for rollback or branch switching.
          */
         return apply_filters( 'github_updater_post_construct_download_link', $download_link, $this->type, $branch_switch );
@@ -177,7 +177,7 @@ class GitHub_API extends API implements API_Interface {
      * @param GitHub_API|API $git Git host specific API object.
      * @param string         $endpoint Endpoint.
      *
-     * @return string $endpoint
+     * @return string
      */
     public function add_endpoints( $git, $endpoint ) {
         switch ( $git::$method ) {
@@ -235,7 +235,7 @@ class GitHub_API extends API implements API_Interface {
      *
      * @param \stdClass|array $response Response from API call.
      *
-     * @return \stdClass|array $arr Array of tag numbers, object is error.
+     * @return \stdClass|array Array of tag numbers, object is error.
      */
     public function parse_tag_response( $response ) {
         if ( $this->validate_response( $response ) ) {
@@ -245,6 +245,10 @@ class GitHub_API extends API implements API_Interface {
         $arr = [];
         array_map(
             function ( $e ) use ( &$arr ) {
+                if ( ! is_object( $e ) || ! isset( $e->name ) ) {
+                    return $arr;
+                }
+
                 $arr[] = $e->name;
 
                 return $arr;
@@ -260,7 +264,7 @@ class GitHub_API extends API implements API_Interface {
      *
      * @param \stdClass|array $response Response from API call.
      *
-     * @return array $arr Array of meta variables.
+     * @return array Array of meta variables.
      */
     public function parse_meta_response( $response ) {
         if ( $this->validate_response( $response ) ) {
@@ -288,7 +292,7 @@ class GitHub_API extends API implements API_Interface {
      *
      * @param \stdClass|array $response Response from API call.
      *
-     * @return array $arr Array of changes in base64.
+     * @return array Array of changes in base64.
      */
     public function parse_changelog_response( $response ) {
         if ( $this->validate_response( $response ) ) {
@@ -310,7 +314,7 @@ class GitHub_API extends API implements API_Interface {
     /**
      * Parse API response and return array of branch data.
      *
-     * @param \stdClass $response API response.
+     * @param array|\stdClass $response API response.
      *
      * @return array Array of branch data.
      */
@@ -320,9 +324,13 @@ class GitHub_API extends API implements API_Interface {
         }
         $branches = [];
         foreach ( $response as $branch ) {
+            if ( ! is_object( $branch ) || ! isset( $branch->name, $branch->commit ) || ! is_object( $branch->commit ) ) {
+                continue;
+            }
+
             $branches[ $branch->name ]['download']    = $this->construct_download_link( $branch->name );
-            $branches[ $branch->name ]['commit_hash'] = $branch->commit->sha;
-            $branches[ $branch->name ]['commit_api']  = $branch->commit->url;
+            $branches[ $branch->name ]['commit_hash'] = isset( $branch->commit->sha ) ? $branch->commit->sha : null;
+            $branches[ $branch->name ]['commit_api']  = isset( $branch->commit->url ) ? $branch->commit->url : null;
         }
 
         return $branches;
@@ -479,8 +487,7 @@ class GitHub_API extends API implements API_Interface {
      * @return mixed
      */
     public function remote_install( $headers, $install ) {
-        $github_com                     = true;
-        $options['github_access_token'] = isset( static::$options['github_access_token'] ) ? static::$options['github_access_token'] : null;
+        $github_com = true;
 
         if ( 'github.com' === $headers['host'] || empty( $headers['host'] ) ) {
             $base            = 'https://api.github.com';
@@ -506,12 +513,6 @@ class GitHub_API extends API implements API_Interface {
                 $install['options']['github_access_token'] = $install['github_access_token'];
             }
         }
-        if ( $github_com ) {
-            $token = ! empty( $install['options']['github_access_token'] )
-                ? $install['options']['github_access_token']
-                : $options['github_access_token'];
-        }
-
         if ( ! empty( static::$options['github_access_token'] ) ) {
             unset( $install['options']['github_access_token'] );
         }

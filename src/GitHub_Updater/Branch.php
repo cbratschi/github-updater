@@ -29,7 +29,7 @@ class Branch {
      * Holds repo cache data.
      *
      * @access public
-     * @var null
+     * @var array|bool|null
      */
     public $cache;
 
@@ -38,7 +38,7 @@ class Branch {
      *
      * @var array $options
      */
-    private static $options;
+    private static $options = [];
 
     /**
      * Variable to hold all repository remote info.
@@ -53,7 +53,7 @@ class Branch {
      *
      * @access public
      *
-     * @param null $cache Data for caching.
+     * @param array|bool|null $cache Data for caching.
      */
     public function __construct( $cache = null ) {
         $this->cache = $cache;

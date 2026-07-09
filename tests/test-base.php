@@ -1,8 +1,4 @@
 <?php
-
-use Fragen\GitHub_Updater;
-
-
 class Test_Base extends \WP_UnitTestCase {
 
 	function test_sample() {

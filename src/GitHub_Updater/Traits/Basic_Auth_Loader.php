@@ -46,7 +46,7 @@ trait Basic_Auth_Loader {
      * @param array  $args HTTP GET REQUEST args.
      * @param string $url  URL.
      *
-     * @return array $args
+     * @return array
      */
     public function download_package( $args, $url ) {
         if ( null !== $args['filename'] ) {
@@ -67,7 +67,7 @@ trait Basic_Auth_Loader {
      * @param array  $args Args passed to the URL.
      * @param string $url  The URL.
      *
-     * @return array $args
+     * @return array
      */
     public function add_auth_header( $args, $url ) {
         $credentials = $this->get_credentials( $url );
@@ -125,15 +125,15 @@ trait Basic_Auth_Loader {
      *
      * @param string $url The URL.
      *
-     * @return array $credentials
+     * @return array
      */
     private function get_credentials( $url ) {
-        $options      = get_site_option( 'github_updater' );
+        $options      = (array) get_site_option( 'github_updater' );
         $headers      = parse_url( $url );
-        $username_key = null;
-        $password_key = null;
+        $headers      = is_array( $headers ) ? $headers : [];
+        $host         = isset( $headers['host'] ) ? $headers['host'] : '';
         $credentials  = [
-            'api.wordpress' => 'api.wordpress.org' === isset( $headers['host'] ) ? $headers['host'] : false,
+            'api.wordpress' => 'api.wordpress.org' === $host,
             'isset'         => false,
             'token'         => null,
             'type'          => null,
@@ -152,20 +152,22 @@ trait Basic_Auth_Loader {
         $slug  = $this->get_slug_for_credentials( $headers, $repos, $url, $options );
         $type  = $this->get_type_for_credentials( $slug, $repos, $url );
 
-        if ( false === $slug && ! in_array( $headers['host'], $hosts, true ) && ! $this instanceof Install ) {
+        if ( false === $slug && ! in_array( $host, $hosts, true ) && ! $this instanceof Install ) {
             return $credentials;
         }
 
         // Set $type for Language Packs.
         if ( $type instanceof Language_Pack_API ) {
-            $type = $type->type->git;
+            $type_vars = get_object_vars( $type );
+            $repo_type = isset( $type_vars['type'] ) && is_object( $type_vars['type'] ) ? $type_vars['type'] : null;
+            $type      = $repo_type && isset( $repo_type->git ) ? $repo_type->git : null;
         }
 
         switch ( $type ) {
             case 'bitbucket':
             case $type instanceof Bitbucket_API:
             case $type instanceof Bitbucket_Server_API:
-                $bitbucket_org   = in_array( $headers['host'], $hosts, true );
+                $bitbucket_org   = in_array( $host, $hosts, true );
                 $bitbucket_token = ! empty( $options['bitbucket_access_token'] ) ? $options['bitbucket_access_token'] : null;
                 $bbserver_token  = ! empty( $options['bbserver_access_token'] ) ? $options['bbserver_access_token'] : null;
                 $token           = ! empty( $options[ $slug ] ) ? $options[ $slug ] : null;
@@ -200,7 +202,7 @@ trait Basic_Auth_Loader {
         $credentials['isset']      = true;
         $credentials['type']       = $type;
         $credentials['token']      = isset( $token ) ? $token : null;
-        $credentials['enterprise'] = ! in_array( $headers['host'], $hosts, true );
+        $credentials['enterprise'] = ! in_array( $host, $hosts, true );
 
         return $credentials;
     }
@@ -213,7 +215,7 @@ trait Basic_Auth_Loader {
      * @param string $url     URL being called by API.
      * @param array  $options Array of site options.
      *
-     * @return bool|string $slug
+     * @return bool|string
      */
     private function get_slug_for_credentials( $headers, $repos, $url, $options ) {
         // phpcs:disable WordPress.Security.NonceVerification.Recommended
@@ -224,7 +226,7 @@ trait Basic_Auth_Loader {
         // Some installers, like TGMPA, pass an array.
         $slug = is_array( $slug ) ? array_pop( $slug ) : $slug;
 
-        $slug = false !== strpos( $slug, '/' ) ? dirname( $slug ) : $slug;
+        $slug = is_string( $slug ) && false !== strpos( $slug, '/' ) ? dirname( $slug ) : $slug;
 
         // Set for bulk upgrade.
         if ( ! $slug ) {
@@ -271,19 +273,20 @@ trait Basic_Auth_Loader {
      * @param array  $repos Array of repositories.
      * @param string $url   URL being called by API.
      *
-     * @return string $slug
+     * @return string
      */
     private function get_type_for_credentials( $slug, $repos, $url ) {
         $type = $this->get_class_vars( 'Base', 'caller' );
+        $repo = $slug && isset( $repos[ $slug ] ) ? $repos[ $slug ] : null;
 
-        $type = $slug && isset( $repos[ $slug ] ) && property_exists( $repos[ $slug ], 'git' )
-            ? $repos[ $slug ]->git
+        $type = is_object( $repo ) && property_exists( $repo, 'git' )
+            ? $repo->git
             : $type;
 
         // Set for WP-CLI.
         if ( ! $slug ) {
             foreach ( $repos as $repo ) {
-                if ( property_exists( $repo, 'download_link' ) && $url === $repo->download_link ) {
+                if ( is_object( $repo ) && property_exists( $repo, 'download_link' ) && $url === $repo->download_link ) {
                     $type = $repo->git;
                     break;
                 }
@@ -311,7 +314,7 @@ trait Basic_Auth_Loader {
      * @param array  $args The URL arguments passed.
      * @param string $url  The URL.
      *
-     * @return array $args
+     * @return array
      */
     public function unset_release_asset_auth( $args, $url ) {
         $aws_host        = false !== strpos( $url, 's3.amazonaws.com' );

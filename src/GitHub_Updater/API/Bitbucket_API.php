@@ -39,7 +39,7 @@ class Bitbucket_API extends API implements API_Interface {
         parent::__construct();
 
         $this->type     = $type;
-        $this->response = $this->get_repo_cache();
+        $this->response = (array) $this->get_repo_cache();
 
         $this->settings_hook( $this );
         $this->add_settings_subtab();
@@ -146,11 +146,11 @@ class Bitbucket_API extends API implements API_Interface {
     }
 
     /**
-     * Construct $this->type->download_link using Bitbucket API.
+     * Construct download link using Bitbucket API.
      *
      * @param boolean $branch_switch For direct branch changing. Defaults to false.
      *
-     * @return string $endpoint
+     * @return string
      */
     public function construct_download_link( $branch_switch = false ) {
         //debug
@@ -166,12 +166,14 @@ class Bitbucket_API extends API implements API_Interface {
         if ( $this->use_release_asset( $branch_switch ) ) {
             $release_asset = $this->get_release_asset();
             $release_asset_redirect = $this->get_release_asset_redirect( $release_asset, true );
+            $release_asset_response = isset( $this->response['release_asset_response'] ) ? $this->response['release_asset_response'] : null;
 
             if ( ! $release_asset_redirect && isset( $this->response['release_asset_redirect'] )
-                && property_exists( $this->response['release_asset_response'], 'browser_download_url' )
+                && is_object( $release_asset_response )
+                && property_exists( $release_asset_response, 'browser_download_url' )
             ) {
                 // For installing.
-                return $this->response['release_asset_response']->browser_download_url;
+                return $release_asset_response->browser_download_url;
             } else {
                 // For updating.
                 return $release_asset_redirect;
@@ -216,7 +218,7 @@ class Bitbucket_API extends API implements API_Interface {
          * @since 8.8.0
          *
          * @param string    $download_link Download URL.
-         * @param /stdClass $this->type    Repository object.
+         * @param \stdClass $type    Repository object.
          * @param string    $branch_switch Branch or tag for rollback or branch switching.
          */
         return apply_filters( 'github_updater_post_construct_download_link', $download_link, $this->type, $branch_switch );
@@ -228,7 +230,7 @@ class Bitbucket_API extends API implements API_Interface {
      * @param Bitbucket_API|API $git      Git host API.
      * @param string            $endpoint Endpoint.
      *
-     * @return string|void $endpoint
+     * @return string|void
      */
     public function add_endpoints( $git, $endpoint ) {
         switch ( $git::$method ) {
@@ -262,18 +264,22 @@ class Bitbucket_API extends API implements API_Interface {
     /**
      * Parse API response call and return only array of tag numbers.
      *
-     * @param \stdClass $response Response from API call.
+     * @param \stdClass|array $response Response from API call.
      *
      * @return array|\stdClass Array of tag numbers, object is error.
      */
     public function parse_tag_response( $response ) {
-        if ( ! isset( $response->values ) || $this->validate_response( $response ) ) {
+        if ( ! is_object( $response ) || ! isset( $response->values ) || $this->validate_response( $response ) ) {
             return $response;
         }
 
         $arr = [];
         array_map(
             function ( $e ) use ( &$arr ) {
+                if ( ! is_object( $e ) || ! isset( $e->name ) ) {
+                    return $arr;
+                }
+
                 $arr[] = $e->name;
 
                 return $arr;
@@ -294,7 +300,7 @@ class Bitbucket_API extends API implements API_Interface {
      *
      * @param \stdClass|array $response Response from API call.
      *
-     * @return array $arr Array of meta variables.
+     * @return array Array of meta variables.
      */
     public function parse_meta_response( $response ) {
         if ( $this->validate_response( $response ) ) {
@@ -322,7 +328,7 @@ class Bitbucket_API extends API implements API_Interface {
      *
      * @param \stdClass|array $response Response from API call.
      *
-     * @return void|array|\stdClass $arr Array of changes in base64, object if error.
+     * @return void|array|\stdClass Array of changes in base64, object if error.
      */
     public function parse_changelog_response( $response ) {
     }
@@ -330,7 +336,7 @@ class Bitbucket_API extends API implements API_Interface {
     /**
      * Parse API response and return array of branch data.
      *
-     * @param \stdClass $response API response.
+     * @param array|\stdClass $response API response.
      *
      * @return array Array of branch data.
      */
@@ -342,12 +348,12 @@ class Bitbucket_API extends API implements API_Interface {
         $branches = [];
 
         foreach ( $response as $branch ) {
-            if ( ! \property_exists( $branch, 'name' ) ) {
+            if ( ! is_object( $branch ) || ! isset( $branch->name, $branch->target ) || ! is_object( $branch->target ) ) {
                 continue;
             }
             $branches[ $branch->name ]['download']         = $this->construct_download_link( $branch->name );
-            $branches[ $branch->name ]['commit_hash']      = $branch->target->hash;
-            $branches[ $branch->name ]['commit_timestamp'] = $branch->target->date;
+            $branches[ $branch->name ]['commit_hash']      = isset( $branch->target->hash ) ? $branch->target->hash : null;
+            $branches[ $branch->name ]['commit_timestamp'] = isset( $branch->target->date ) ? $branch->target->date : null;
         }
 
         return $branches;
@@ -356,8 +362,8 @@ class Bitbucket_API extends API implements API_Interface {
     /**
      * Parse tags and create download links.
      *
-     * @param \stdClass|array $response  Response from API call.
-     * @param string          $repo_type Repo type.
+     * @param \stdClass|array      $response  Response from API call.
+     * @param array $repo_type Repo type.
      *
      * @return array
      */
@@ -593,7 +599,7 @@ class Bitbucket_API extends API implements API_Interface {
      * @param array $headers Array of headers.
      * @param array $install Array of install data.
      *
-     * @return mixed $install
+     * @return mixed
      */
     public function remote_install( $headers, $install ) {
         //debug

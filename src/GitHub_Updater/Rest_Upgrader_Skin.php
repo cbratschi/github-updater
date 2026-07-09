@@ -80,9 +80,9 @@ class Rest_Upgrader_Skin extends \WP_Upgrader_Skin {
 	/**
 	 * Do nothing.
 	 *
-	 * @param mixed $type I don't know, not used.
+	 * @param mixed $_type Unused update type.
 	 */
-	protected function decrement_update_count( $type ) {
+	protected function decrement_update_count( $_type ) {
 	}
 
 	/**

@@ -43,21 +43,21 @@ class Install {
      *
      * @var mixed
      */
-    private static $options;
+    private static $options = [];
 
     /**
      * Hold local copy of installed APIs.
      *
      * @var mixed
      */
-    private static $installed_apis;
+    private static $installed_apis = [];
 
     /**
      * Hold local copy of git servers.
      *
      * @var mixed
      */
-    private static $git_servers;
+    private static $git_servers = [];
 
     /**
      * Constructor.
@@ -509,12 +509,12 @@ class Install {
      * Fix activation links after theme installation, no method to get proper theme name.
      *
      * @param array $install_actions Array of theme actions.
-     * @param mixed $api             Unused.
-     * @param mixed $theme_info      Theme slug.
+     * @param mixed $_api        Unused.
+     * @param mixed $_theme_info Unused theme slug.
      *
      * @return mixed
      */
-    public function install_theme_complete_actions( $install_actions, $api, $theme_info ) {
+    public function install_theme_complete_actions( $install_actions, $_api, $_theme_info ) {
         if ( isset( $install_actions['preview'] ) ) {
             unset( $install_actions['preview'] );
         }

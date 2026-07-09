@@ -80,7 +80,7 @@ interface API_Interface {
 	public function get_release_asset();
 
 	/**
-	 * Construct $this->type->download_link using Repository Contents API.
+	 * Construct download link using Repository Contents API.
 	 *
 	 * @access public
 	 *
@@ -95,10 +95,10 @@ interface API_Interface {
 	 *
 	 * @access public
 	 *
-	 * @param GitHub_API|Bitbucket_API|Bitbucket_Server_API|GitLab_API $git      Git host specific API.
-	 * @param string                                                   $endpoint Endpoint.
+	 * @param GitHub_API|Bitbucket_API|Bitbucket_Server_API|GitLab_API|Gist_API $git Git host specific API.
+	 * @param string|array $endpoint Endpoint.
 	 *
-	 * @return string $endpoint
+	 * @return string
 	 */
 	public function add_endpoints( $git, $endpoint );
 
@@ -131,7 +131,7 @@ interface API_Interface {
 	 *
 	 * @param \stdClass|array $response API response.
 	 *
-	 * @return array|\stdClass $arr Array of changes in base64, object if error.
+	 * @return array|\stdClass Array of changes in base64, object if error.
 	 */
 	public function parse_changelog_response( $response );
 
@@ -140,7 +140,7 @@ interface API_Interface {
 	 *
 	 * @access public
 	 *
-	 * @param \stdClass $response API response.
+	 * @param array|\stdClass $response API response.
 	 *
 	 * @return array Array of branch data.
 	 */
@@ -175,7 +175,7 @@ interface API_Interface {
 	 * @param array $headers Array of headers.
 	 * @param array $install Array of install data.
 	 *
-	 * @return mixed $install
+	 * @return mixed
 	 */
 	public function remote_install( $headers, $install );
 }

@@ -14,6 +14,15 @@ use Fragen\GitHub_Updater\Readme_Parser as Readme_Parser;
 
 /**
  * Trait API_Common
+ *
+ * @mixin \Fragen\GitHub_Updater\API
+ * @method mixed bbserver_recombine_response( mixed $response )
+ * @method mixed parse_tag_response( mixed $response )
+ * @method array parse_tags( mixed $response, array $repo_type )
+ * @method mixed parse_meta_response( mixed $response )
+ * @method array parse_branch_response( mixed $response )
+ * @property \stdClass|null $type
+ * @property array $response
  */
 trait API_Common {
     /**
@@ -21,14 +30,50 @@ trait API_Common {
      *
      * @var null
      */
-    protected static $method;
+    protected static $method = null;
+
+    /**
+     * Get repo type object when present on the current API instance.
+     *
+     * @return \stdClass|null
+     */
+    private function get_api_common_type_object() {
+        $object_vars = get_object_vars( $this );
+        $type        = isset( $object_vars['type'] ) ? $object_vars['type'] : null;
+
+        return is_object( $type ) ? $type : null;
+    }
+
+    /**
+     * Get repo type data when present on the current API instance.
+     *
+     * @return array
+     */
+    private function get_api_common_type_vars() {
+        $object_vars = get_object_vars( $this );
+        $type        = isset( $object_vars['type'] ) ? $object_vars['type'] : null;
+
+        return is_object( $type ) || is_array( $type ) ? (array) $type : [];
+    }
+
+    /**
+     * Get cached API response data when present on the current API instance.
+     *
+     * @return array
+     */
+    private function get_api_common_response_vars() {
+        $object_vars = get_object_vars( $this );
+        $response    = isset( $object_vars['response'] ) ? $object_vars['response'] : [];
+
+        return is_array( $response ) ? $response : [];
+    }
 
     /**
      * Decode API responses that are base64 encoded.
      *
      * @param  string $git      (github|bitbucket|gitlab|gitea).
      * @param  mixed  $response API response.
-     * @return mixed  $response
+     * @return mixed
      */
     private function decode_response( $git, $response ) {
         switch ( $git ) {
@@ -51,7 +96,7 @@ trait API_Common {
      *
      * @param  string $git      (github|bitbucket|gitlab|gitea).
      * @param  mixed  $response API response.
-     * @return mixed  $response
+     * @return mixed
      */
     private function parse_response( $git, $response ) {
         switch ( $git ) {
@@ -70,18 +115,23 @@ trait API_Common {
      * @param  string $git      (github|bitbucket|gitlab|gitea).
      * @param  string $request  Query to API->api().
      * @param  mixed  $response API response.
-     * @return string $response Release asset download link.
+     * @return string Release asset download link.
      */
     private function parse_release_asset( $git, $request, $response ) {
         if ( is_wp_error( $response ) ) {
             return null;
         }
 
+        $type_vars = $this->get_api_common_type_vars();
+        $slug      = isset( $type_vars['slug'] ) ? $type_vars['slug'] : '';
+
         switch ( $git ) {
             case 'github':
                 $assets = isset( $response->assets ) ? $response->assets : [];
                 foreach ( $assets as $asset ) {
-                    if ( 1 === count( $assets ) || 0 === strpos( $asset->name, $this->type->slug ) ) {
+                    $asset_name = isset( $asset->name ) ? $asset->name : '';
+
+                    if ( 1 === count( $assets ) || ( $slug && 0 === strpos( $asset_name, $slug ) ) ) {
                         $response = $asset->url;
                         break;
                     }
@@ -91,20 +141,26 @@ trait API_Common {
 
             case 'bitbucket':
                 $assets = isset( $response->values ) ? $response->values : [];
+                $matched_asset = null;
 
                 foreach ( $assets as $asset ) {
-                    if ( 1 === count( $assets ) || 0 === strpos( $asset->name, $this->type->slug ) ) {
-                        $response = $asset->links->self->href;
+                    $asset_name = isset( $asset->name ) ? $asset->name : '';
+
+                    if ( 1 === count( $assets ) || ( $slug && 0 === strpos( $asset_name, $slug ) ) ) {
+                        $matched_asset = $asset;
+                        $response      = isset( $asset->links->self->href ) ? $asset->links->self->href : null;
                         break;
                     }
                 }
 
-                $response                    = is_string( $response ) ? $response : null;
-                $asset->browser_download_url = $response;
-                $asset->download_count       = $asset->downloads;
+                $response = is_string( $response ) ? $response : null;
 
-                //cbxx FIXME $obj param not available
-                //$obj->set_repo_cache( 'release_asset_response', $asset );
+                if ( $matched_asset ) {
+                    $matched_asset->browser_download_url = $response;
+                    $matched_asset->download_count       = isset( $matched_asset->downloads ) ? $matched_asset->downloads : 0;
+
+                    $this->set_repo_cache( 'release_asset_response', $matched_asset );
+                }
                 break;
 
             case 'bbserver':
@@ -132,7 +188,9 @@ trait API_Common {
      * @return bool
      */
     public function get_remote_api_info( $git, $file, $request ) {
-        $response = isset( $this->response[ $file ] ) ? $this->response[ $file ] : false;
+        $response_cache = $this->get_api_common_response_vars();
+        $response       = isset( $response_cache[ $file ] ) ? $response_cache[ $file ] : false;
+        $type           = $this->get_api_common_type_vars();
 
         if ( ! $response ) {
             self::$method = 'file';
@@ -141,10 +199,10 @@ trait API_Common {
         }
 
         if ( $response && is_string( $response ) && ! is_wp_error( $response ) ) {
-            $response = $this->get_file_headers( $response, $this->type->type );
+            $response = $this->get_file_headers( $response, isset( $type['type'] ) ? $type['type'] : 'plugin' );
 
             $this->set_repo_cache( $file, $response );
-            $this->set_repo_cache( 'repo', $this->type->slug );
+            $this->set_repo_cache( 'repo', isset( $type['slug'] ) ? $type['slug'] : 'ghu' );
         }
 
         if ( ! is_array( $response ) || $this->validate_response( $response ) ) {
@@ -160,14 +218,15 @@ trait API_Common {
     /**
      * Get remote info for tags.
      *
-     * @param string $git     github|bitbucket|gitlab|gitea).
+     * @param string $_git    Unused git provider.
      * @param string $request API request.
      *
      * @return bool
      */
-    public function get_remote_api_tag( $git, $request ) {
-        $repo_type = $this->return_repo_type();
-        $response  = isset( $this->response['tags'] ) ? $this->response['tags'] : false;
+    public function get_remote_api_tag( $_git, $request ) {
+        $response_cache = $this->get_api_common_response_vars();
+        $repo_type      = $this->return_repo_type();
+        $response       = isset( $response_cache['tags'] ) ? $response_cache['tags'] : false;
 
         if ( ! $response ) {
             self::$method = 'tags';
@@ -204,11 +263,13 @@ trait API_Common {
      * @return bool
      */
     public function get_remote_api_changes( $git, $changes, $request ) {
-        $response = isset( $this->response['changes'] ) ? $this->response['changes'] : false;
+        $response_cache = $this->get_api_common_response_vars();
+        $response       = isset( $response_cache['changes'] ) ? $response_cache['changes'] : false;
+        $type           = $this->get_api_common_type_object();
 
         // Set $response from local file if no update available.
-        if ( ! $response && ! $this->can_update_repo( $this->type ) ) {
-            $response = $this->get_local_info( $this->type, $changes );
+        if ( ! $response && $type && ! $this->can_update_repo( $type ) ) {
+            $response = $this->get_local_info( $type, $changes );
         }
 
         if ( ! $response ) {
@@ -226,13 +287,16 @@ trait API_Common {
             return false;
         }
 
-        if ( $response && ! isset( $this->response['changes'] ) ) {
+        if ( $response && ! isset( $response_cache['changes'] ) ) {
             $parser   = new \Parsedown();
             $response = $parser->text( $response );
             $this->set_repo_cache( 'changes', $response );
         }
 
-        $this->type->sections['changelog'] = $response;
+        if ( $type ) {
+            $type->sections              = isset( $type->sections ) && is_array( $type->sections ) ? $type->sections : [];
+            $type->sections['changelog'] = $response;
+        }
 
         return true;
     }
@@ -250,11 +314,13 @@ trait API_Common {
             return false;
         }
 
-        $response = isset( $this->response['readme'] ) ? $this->response['readme'] : false;
+        $response_cache = $this->get_api_common_response_vars();
+        $response       = isset( $response_cache['readme'] ) ? $response_cache['readme'] : false;
+        $type           = $this->get_api_common_type_object();
 
         // Set $response from local file if no update available.
-        if ( ! $response && ! $this->can_update_repo( $this->type ) ) {
-            $response = $this->get_local_info( $this->type, 'readme.txt' );
+        if ( ! $response && $type && ! $this->can_update_repo( $type ) ) {
+            $response = $this->get_local_info( $type, 'readme.txt' );
         }
 
         if ( ! $response ) {
@@ -272,7 +338,7 @@ trait API_Common {
             return false;
         }
 
-        if ( $response && ! isset( $this->response['readme'] ) ) {
+        if ( $response && ! isset( $response_cache['readme'] ) ) {
             $parser   = new Readme_Parser( $response );
             $response = $parser->parse_data();
             $this->set_repo_cache( 'readme', $response );
@@ -286,13 +352,15 @@ trait API_Common {
     /**
      * Read the repository meta from API.
      *
-     * @param string $git     github|bitbucket|gitlab|gitea).
+     * @param string $_git    Unused git provider.
      * @param string $request API request.
      *
      * @return bool
      */
-    public function get_remote_api_repo_meta( $git, $request ) {
-        $response = isset( $this->response['meta'] ) ? $this->response['meta'] : false;
+    public function get_remote_api_repo_meta( $_git, $request ) {
+        $response_cache = $this->get_api_common_response_vars();
+        $response       = isset( $response_cache['meta'] ) ? $response_cache['meta'] : false;
+        $type           = $this->get_api_common_type_object();
 
         if ( ! $response ) {
             self::$method = 'meta';
@@ -308,7 +376,9 @@ trait API_Common {
             return false;
         }
 
-        $this->type->repo_meta = $response;
+        if ( $type ) {
+            $type->repo_meta = $response;
+        }
         $this->add_meta_repo_object();
 
         return true;
@@ -326,8 +396,10 @@ trait API_Common {
         //debug
         //error_log('get_remote_api_branches()');
 
-        $branches = [];
-        $response = $this->response['branches'] ?? false;
+        $response_cache = $this->get_api_common_response_vars();
+        $branches       = [];
+        $response       = isset( $response_cache['branches'] ) ? $response_cache['branches'] : false;
+        $type           = $this->get_api_common_type_object();
 
         //debug
         //error_log('Response: ' . json_encode($response));
@@ -349,14 +421,18 @@ trait API_Common {
             //debug
             //error_log('Branches response:' . json_encode($response));
 
-            $branches             = $this->parse_branch_response( $response );
-            $this->type->branches = $branches;
+            $branches = $this->parse_branch_response( $response );
+            if ( $type ) {
+                $type->branches = $branches;
+            }
             $this->set_repo_cache( 'branches', $branches );
 
             return true;
         }
 
-        $this->type->branches = $response;
+        if ( $type ) {
+            $type->branches = $response;
+        }
 
         return true;
     }
@@ -366,10 +442,11 @@ trait API_Common {
      *
      * @param  string $git     (github|bitbucket|gitlab|gitea).
      * @param  string $request Query for API->api().
-     * @return string $response Release asset URI.
+     * @return string Release asset URI.
      */
     public function get_api_release_asset( $git, $request ) {
-        $response = isset( $this->response['release_asset'] ) ? $this->response['release_asset'] : false;
+        $response_cache = $this->get_api_common_response_vars();
+        $response       = isset( $response_cache['release_asset'] ) ? $response_cache['release_asset'] : false;
 
         if ( $response && $this->exit_no_update( $response ) ) {
             return false;
@@ -386,7 +463,7 @@ trait API_Common {
             }
         }
 
-        if ( $response && ! isset( $this->response['release_asset'] ) ) {
+        if ( $response && ! isset( $response_cache['release_asset'] ) ) {
             $this->set_repo_cache( 'release_asset', $response );
         }
 

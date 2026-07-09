@@ -25,7 +25,14 @@ class Remote_Management {
 	 *
 	 * @var array $option_remote
 	 */
-	public static $options_remote;
+	public static $options_remote = [];
+
+	/**
+	 * Holds the values for remote management settings.
+	 *
+	 * @var array $remote_options
+	 */
+	private static $remote_options = [];
 
 	/**
 	 * Supported remote management services.
@@ -46,7 +53,7 @@ class Remote_Management {
 	 *
 	 * @var string $api_key
 	 */
-	private static $api_key;
+	private static $api_key = '';
 
 	/**
 	 * Remote_Management constructor.
@@ -60,8 +67,9 @@ class Remote_Management {
 	 * Load site options.
 	 */
 	private function load_options() {
-		self::$options_remote = get_site_option( 'github_updater_remote_management', [] );
-		self::$api_key        = get_site_option( 'github_updater_api_key' );
+		self::$remote_options      = get_site_option( 'github_updater_remote_management', [] );
+		self::${'options_remote'}  = self::$remote_options;
+		self::$api_key             = get_site_option( 'github_updater_api_key' );
 	}
 
 	/**
@@ -255,7 +263,7 @@ class Remote_Management {
 	 * @return bool|void
 	 */
 	public function token_callback_checkbox_remote( $args ) {
-		$checked = isset( self::$options_remote[ $args['id'] ] ) ? self::$options_remote[ $args['id'] ] : null;
+		$checked = isset( self::$remote_options[ $args['id'] ] ) ? self::$remote_options[ $args['id'] ] : null;
 		?>
 		<label for="<?php esc_attr_e( $args['id'] ); ?>">
 			<input type="checkbox" id="<?php esc_attr_e( $args['id'] ); ?>" name="github_updater_remote_management[<?php esc_attr_e( $args['id'] ); ?>]" value="1" <?php checked( '1', $checked ); ?> >

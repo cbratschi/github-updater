@@ -32,10 +32,10 @@ if ( ! defined( 'WPINC' ) ) {
  */
 class MU_Loader {
     /**
-     * Holds plugin file.
-     *
-     * @var $plugin_file
-     */
+	 * Holds plugin file.
+	 *
+	 * @var string $plugin_file
+	 */
     private static $plugin_file = 'github-updater/github-updater.php';
 
     /**

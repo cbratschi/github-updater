@@ -44,7 +44,7 @@ class Base {
      *
      * @var array
      */
-    public static $options;
+    public static $options = [];
 
     /**
      * Holds git server types.
@@ -88,14 +88,14 @@ class Base {
     /**
      * Holds plugin data.
      *
-     * @var stdClass
+     * @var \stdClass
      */
     protected $plugin;
 
     /**
      * Holds theme data.
      *
-     * @var stdClass
+     * @var \stdClass
      */
     protected $theme;
 
@@ -293,7 +293,6 @@ class Base {
      * @param array $batches Cron event args, array of repo objects.
      */
     public function run_cron_batch( array $batches ) {
-        //cbxx TODO check handling
         foreach ( $batches as $repo ) {
             $this->get_remote_repo_meta( $repo );
         }
@@ -508,7 +507,7 @@ class Base {
      * @param Plugin|Theme $upgrader_object An Upgrader object.
      * @param string       $slug            Repository slug.
      *
-     * @return string $new_source
+     * @return string
      */
     private function fix_misnamed_directory( $new_source, $remote_source, $upgrader_object, $slug ) {
         $config = $this->get_class_vars( ( new \ReflectionClass( $upgrader_object ) )->getShortName(), 'config' );
@@ -528,11 +527,11 @@ class Base {
      *
      * @param string    $type          plugin|theme.
      * @param \stdClass $repo          Repo object.
-     * @param bool      $set_transient Default false, if true then set update transient.
+     * @param bool      $_set_transient Unused. Default false, if true then set update transient.
      *
-     * @return array $rollback Rollback transient.
+     * @return array Rollback transient.
      */
-    public function set_rollback_transient( $type, $repo, $set_transient = false ) {
+    public function set_rollback_transient( $type, $repo, $_set_transient = false ) {
         $repo_api = Singleton::get_instance( 'API', $this )->get_repo_api( $repo->git, $repo );
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended
         $this->tag     = isset( $_GET['rollback'] ) ? sanitize_text_field( wp_unslash( $_GET['rollback'] ) ) : false;
@@ -547,8 +546,8 @@ class Base {
          * @since 8.6.0
          *
          * @param string    $download_link Download URL.
-         * @param /stdClass $repo
-         * @param string    $this->tag     Branch or tag for rollback.
+         * @param \stdClass $repo
+         * @param string    $tag           Branch or tag for rollback.
          */
         $download_link = apply_filters_deprecated(
             'github_updater_set_rollback_package',
@@ -587,12 +586,10 @@ class Base {
     public function update_row_enclosure( $repo_name, $type, $branch_switcher = false ) {
         global $wp_version;
         $wp_list_table = _get_list_table( 'WP_Plugins_List_Table' );
-        $repo_base     = $repo_name;
         $shiny_classes = 'notice inline notice-warning notice-alt';
 
         $active = '';
         if ( 'plugin' === $type ) {
-            $repo_base = dirname( $repo_name );
             if ( is_plugin_active( $repo_name ) ) {
                 $active = ' active';
             }
@@ -710,7 +707,7 @@ class Base {
              * Filter to return the number of tagged releases (rollbacks) in branch switching.
              *
              * @since 9.6.0
-             * @param int Number of rollbacks. Zero implies value not set.
+             * @param int $num_rollbacks Number of rollbacks. Zero implies value not set.
              */
             $num_rollbacks = absint( apply_filters( 'github_updater_number_rollbacks', 0 ) );
 
@@ -777,7 +774,7 @@ class Base {
      * @param array  $links Row meta action links.
      * @param string $file  Plugin or theme file.
      *
-     * @return array $links
+     * @return array
      */
     public function row_meta_icons( $links, $file ) {
         $icon = $this->get_git_icon( $file, false );

@@ -45,7 +45,7 @@ class Readme_Parser extends Parser {
 	/**
 	 * Return parsed readme.txt as array.
 	 *
-	 * @return array $data
+	 * @return array
 	 */
 	public function parse_data() {
 		$data = [];
@@ -75,7 +75,7 @@ class Readme_Parser extends Parser {
 	 *
 	 * @param array $users Array of users.
 	 *
-	 * @return array $contributors
+	 * @return array
 	 */
 	private function create_contributors( $users ) {
 		global $wp_version;
@@ -97,7 +97,7 @@ class Readme_Parser extends Parser {
 	 *
 	 * @param array $data Array of parsed readme data.
 	 *
-	 * @return array $data
+	 * @return array
 	 */
 	public function faq_as_h4( $data ) {
 		if ( empty( $data['faq'] ) ) {
@@ -118,7 +118,7 @@ class Readme_Parser extends Parser {
 	 * @param string $section Readme section.
 	 * @param array  $data    Array of parsed readme data.
 	 *
-	 * @return array $data
+	 * @return array
 	 */
 	public function readme_section_as_h4( $section, $data ) {
 		if ( empty( $data['sections'][ $section ] ) || false !== strpos( $data['sections'][ $section ], '<h4>' ) ) {

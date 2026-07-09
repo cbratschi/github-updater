@@ -44,7 +44,7 @@ class Rest_Update {
      *
      * @var array
      */
-    protected static $request;
+    protected static $request = [];
 
     /**
      * Holds regex pattern for version number.
@@ -108,10 +108,11 @@ class Rest_Update {
             function ( $current ) use ( $plugin, $update ) {
                 // needed to fix PHP 7.4 warning.
                 if ( ! \is_object( $current ) ) {
-                    $current           = new \stdClass();
-                    $current->response = null;
-                } elseif ( ! \property_exists( $current, 'response' ) ) {
-                    $current->response = null;
+                    $current = new \stdClass();
+                }
+
+                if ( ! isset( $current->response ) || ! is_array( $current->response ) ) {
+                    $current->response = [];
                 }
 
                 $current->response[ $plugin->file ] = (object) $update;
@@ -174,10 +175,11 @@ class Rest_Update {
             function ( $current ) use ( $theme, $update ) {
                 // needed to fix PHP 7.4 warning.
                 if ( ! \is_object( $current ) ) {
-                    $current           = new \stdClass();
-                    $current->response = null;
-                } elseif ( ! \property_exists( $current, 'response' ) ) {
-                    $current->response = null;
+                    $current = new \stdClass();
+                }
+
+                if ( ! isset( $current->response ) || ! is_array( $current->response ) ) {
+                    $current->response = [];
                 }
 
                 $current->response[ $theme->slug ] = $update;
@@ -345,7 +347,7 @@ class Rest_Update {
      * @param string|bool $plugin Plugin slug or false.
      * @param string|bool $theme  Theme slug or false.
      *
-     * @return string $current_branch Default return is 'master'.
+     * @return string Default return is 'master'.
      */
     private function get_local_branch( $plugin, $theme ) {
         $repo = false;

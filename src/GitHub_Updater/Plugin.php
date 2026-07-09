@@ -51,14 +51,14 @@ class Plugin {
      *
      * @var array
      */
-    private static $extra_headers;
+    private static $extra_headers = [];
 
     /**
      * Holds options.
      *
      * @var array
      */
-    private static $options;
+    private static $options = [];
 
     /**
      * Rollback variable.
@@ -104,19 +104,15 @@ class Plugin {
 
         $plugins     = get_plugins();
         $git_plugins = [];
+        $paths       = [];
 
-        array_map(
-            function ( $plugin ) use ( &$paths ) {
-                $paths[ $plugin ] = WP_PLUGIN_DIR . "/{$plugin}";
+        foreach ( array_keys( $plugins ) as $plugin ) {
+            $paths[ $plugin ] = WP_PLUGIN_DIR . "/{$plugin}";
+        }
 
-                return $paths;
-            },
-            array_keys( $plugins )
-        );
-
-        $repos_arr = [];
+        $all_headers = $this->get_headers( 'plugin' );
+        $repos_arr   = [];
         foreach ( $paths as $slug => $path ) {
-            $all_headers        = $this->get_headers( 'plugin' );
             $repos_arr[ $slug ] = get_file_data( $path, $all_headers, 'plugin' );
         }
 
@@ -140,7 +136,7 @@ class Plugin {
          * @param array $additions Listing of plugins to add.
          *                         Default null.
          * @param array $plugins   Listing of all plugins.
-         * @param string 'plugin'   Type being passed.
+         * @param string $type      Type being passed.
          */
         $additions = apply_filters( 'github_updater_additions', null, $plugins, 'plugin' );
         $plugins   = array_merge( $plugins, (array) $additions );
@@ -162,8 +158,6 @@ class Plugin {
             if ( null === $key || ! \array_key_exists( $key, $all_headers ) ) {
                 continue;
             }
-            $repo_uri = $plugin[ $key ];
-
             $header_parts = explode( ' ', self::$extra_headers[ $key ] );
             $repo_parts   = $this->get_repo_parts( $header_parts[0], 'plugin' );
 
@@ -254,7 +248,7 @@ class Plugin {
              * @since  7.4.0
              * @access public
              *
-             * @param bool
+             * @param bool $disable_wpcron Whether to disable WP-Cron background updates.
              */
             if ( ! $this->waiting_for_background_update( $plugin ) || static::is_wp_cli()
                 || apply_filters( 'github_updater_disable_wpcron', false )
@@ -300,11 +294,11 @@ class Plugin {
      * Add branch switch row to plugins page.
      *
      * @param string    $plugin_file Plugin file.
-     * @param \stdClass $plugin_data Plugin repo data.
+     * @param \stdClass $_plugin_data Unused plugin repo data.
      *
      * @return bool
      */
-    public function plugin_branch_switcher( $plugin_file, $plugin_data ) {
+    public function plugin_branch_switcher( $plugin_file, $_plugin_data ) {
         if ( empty( self::$options['branch_switch'] ) ) {
             return false;
         }
@@ -405,16 +399,22 @@ class Plugin {
      *
      * @param \stdClass $transient Plugin update transient.
      *
-     * @return mixed
+     * @return \stdClass
      */
     public function update_site_transient( $transient ) {
         // needed to fix PHP 7.4 warning.
         if ( ! \is_object( $transient ) ) {
             $transient = new \stdClass();
         }
+        if ( ! isset( $transient->response ) || ! is_array( $transient->response ) ) {
+            $transient->response = [];
+        }
+        if ( ! isset( $transient->no_update ) || ! is_array( $transient->no_update ) ) {
+            $transient->no_update = [];
+        }
 
         foreach ( (array) $this->config as $plugin ) {
-            if ( ! property_exists( $plugin, 'remote_version' ) ) {
+            if ( ! is_object( $plugin ) || ! property_exists( $plugin, 'remote_version' ) ) {
                 continue;
             }
 
@@ -428,7 +428,6 @@ class Plugin {
                 'tested'           => isset($plugin->tested) ? $plugin->tested:null,
                 'requires'         => $plugin->requires,
                 'requires_php'     => $plugin->requires_php,
-                'icons'            => $plugin->icons,
                 'banners'          => $plugin->banners,
                 'branch'           => $plugin->branch,
                 'branches'         => array_keys( $plugin->branches ),

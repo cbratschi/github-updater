@@ -61,7 +61,7 @@ class Zipfile_API {
 	 * @param array $headers Array of headers.
 	 * @param array $install Array of install data.
 	 *
-	 * @return mixed $install
+	 * @return mixed
 	 */
 	public function remote_install( $headers, $install ) {
 		$install['download_link']               = ! empty( $headers['uri'] ) ? $headers['uri'] : $headers['original'];

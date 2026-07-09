@@ -53,14 +53,14 @@ class Theme {
      *
      * @var array
      */
-    private static $extra_headers;
+    private static $extra_headers = [];
 
     /**
      * Holds options.
      *
      * @var array
      */
-    private static $options;
+    private static $options = [];
 
     /**
      * Rollback variable.
@@ -130,9 +130,9 @@ class Theme {
         );
         $paths = array_filter( $paths );
 
-        $repos_arr = [];
+        $all_headers = $this->get_headers( 'theme' );
+        $repos_arr   = [];
         foreach ( $paths as $slug => $path ) {
-            $all_headers        = $this->get_headers( 'theme' );
             $repos_arr[ $slug ] = get_file_data( $path, $all_headers, 'theme' );
         }
 
@@ -156,7 +156,7 @@ class Theme {
          * @param array $additions Listing of themes to add.
          *                         Default null.
          * @param array $themes    Listing of all themes.
-         * @param string 'theme'    Type being passed.
+         * @param string $type      Type being passed.
          */
         $additions = apply_filters( 'github_updater_additions', null, $themes, 'theme' );
         $themes    = array_merge( $themes, (array) $additions );
@@ -242,7 +242,7 @@ class Theme {
              * @since  7.4.0
              * @access public
              *
-             * @param bool
+             * @param bool $disable_wpcron Whether to disable WP-Cron background updates.
              */
             if ( ! $this->waiting_for_background_update( $theme ) || static::is_wp_cli()
                 || apply_filters( 'github_updater_disable_wpcron', false )
@@ -380,7 +380,7 @@ class Theme {
         );
         $enclosure         = $this->base->update_row_enclosure( $theme_key, 'theme' );
 
-        if ( isset( $current->response[ $theme_key ] ) ) {
+        if ( is_object( $current ) && isset( $current->response[ $theme_key ] ) ) {
             $response = $current->response[ $theme_key ];
             echo wp_kses_post( $enclosure['open'] );
 
@@ -428,11 +428,11 @@ class Theme {
      * Create branch switcher row for multisite installation.
      *
      * @param string $theme_key Theme slug.
-     * @param array  $theme     Array of theme data.
+     * @param array  $_theme    Unused array of theme data.
      *
      * @return bool
      */
-    public function multisite_branch_switcher( $theme_key, $theme ) {
+    public function multisite_branch_switcher( $theme_key, $_theme ) {
         if ( empty( self::$options['branch_switch'] ) ) {
             return false;
         }
@@ -476,9 +476,9 @@ class Theme {
      * @author @grappler
      *
      * @param string $theme_key Theme slug.
-     * @param array  $theme     Array of theme data.
+     * @param array  $_theme    Unused array of theme data.
      */
-    public function remove_after_theme_row( $theme_key, $theme ) {
+    public function remove_after_theme_row( $theme_key, $_theme ) {
         $themes = $this->get_theme_configs();
 
         if ( array_key_exists( $theme_key, $themes ) ) {
@@ -547,7 +547,7 @@ class Theme {
          * Display theme update links.
          */
         ob_start();
-        if ( isset( $current->response[ $theme->slug ] ) ) {
+        if ( is_object( $current ) && isset( $current->response[ $theme->slug ] ) ) {
             ?>
             <p>
                 <strong>
@@ -635,7 +635,7 @@ class Theme {
                  * Filter to return the number of tagged releases (rollbacks) in branch switching.
                  *
                  * @since 9.6.0
-                 * @param int Number of rollbacks. Zero implies value not set.
+                 * @param int $num_rollbacks Number of rollbacks. Zero implies value not set.
                  */
                 $num_rollbacks = absint( apply_filters( 'github_updater_number_rollbacks', 0 ) );
 
@@ -665,18 +665,24 @@ class Theme {
      * Hook into site_transient_update_themes to update.
      * Finds newest tag and compares to current tag.
      *
-     * @param array $transient Theme update transient.
+     * @param \stdClass $transient Theme update transient.
      *
-     * @return array|\stdClass
+     * @return \stdClass
      */
     public function update_site_transient( $transient ) {
         // needed to fix PHP 7.4 warning.
         if ( ! \is_object( $transient ) ) {
             $transient = new \stdClass();
         }
+        if ( ! isset( $transient->response ) || ! is_array( $transient->response ) ) {
+            $transient->response = [];
+        }
+        if ( ! isset( $transient->no_update ) || ! is_array( $transient->no_update ) ) {
+            $transient->no_update = [];
+        }
 
         foreach ( (array) $this->config as $theme ) {
-            if ( ! property_exists( $theme, 'remote_version' ) ) {
+            if ( ! is_object( $theme ) || ! property_exists( $theme, 'remote_version' ) ) {
                 continue;
             }
             $response = [

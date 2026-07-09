@@ -37,7 +37,7 @@ class Gist_API extends API implements API_Interface {
 	public function __construct( $type ) {
 		parent::__construct();
 		$this->type     = null === $type ? $type : $this->parse_gist_meta( $type );
-		$this->response = $this->get_repo_cache();
+		$this->response = (array) $this->get_repo_cache();
 		$branch         = new Branch( $this->response );
 		if ( ! empty( $type->branch ) ) {
 			$this->type->branch = ! empty( $branch->cache['current_branch'] )
@@ -120,13 +120,13 @@ class Gist_API extends API implements API_Interface {
 	}
 
 	/**
-	 * Construct $this->type->download_link using Repository Contents API.
+	 * Construct download link using Repository Contents API.
 	 *
 	 * @url http://developer.github.com/v3/repos/contents/#get-archive-link
 	 *
 	 * @param boolean $branch_switch for direct branch changing.
 	 *
-	 * @return string $endpoint
+	 * @return string
 	 */
 	public function construct_download_link( $branch_switch = false ) {
 		if ( ! isset( $this->response['meta'] ) ) {
@@ -145,7 +145,7 @@ class Gist_API extends API implements API_Interface {
 		 * @since 8.8.0
 		 *
 		 * @param string    $download_link Download URL.
-		 * @param /stdClass $this->type    Repository object.
+		 * @param \stdClass $type    Repository object.
 		 * @param string    $branch_switch Branch or tag for rollback or branch switching.
 		 */
 		return apply_filters( 'github_updater_post_construct_download_link', $download_link, $this->type, $branch_switch );
@@ -154,30 +154,32 @@ class Gist_API extends API implements API_Interface {
 	/**
 	 * Create GitHub API endpoints.
 	 *
-	 * @param GitHub_API|API $git      Git host specific API object.
-	 * @param string         $endpoint Endpoint.
+	 * @param GitHub_API|API $git       Git host specific API object.
+	 * @param array          $repo_type Gist repo type data.
 	 *
-	 * @return string $endpoint
+	 * @return string
 	 */
-	public function add_endpoints( $git, $endpoint ) {
+	public function add_endpoints( $git, $repo_type ) {
 		switch ( $git::$method ) {
 			case 'file':
 			case 'readme':
 			case 'changes':
-				$endpoint = $endpoint['base_raw'];
+				$endpoint = $repo_type['base_raw'];
 				break;
 			case 'meta':
 			case 'translation':
-				$endpoint = $endpoint['base_uri'];
+				$endpoint = $repo_type['base_uri'];
 				break;
 			case 'download_link':
-				$endpoint = $endpoint['base_download'];
+				$endpoint = $repo_type['base_download'];
 				break;
 			case 'branches':
 			case 'tags':
 			case 'release_asset':
+				$endpoint = '';
 				break;
 			default:
+				$endpoint = '';
 				break;
 		}
 
@@ -192,8 +194,8 @@ class Gist_API extends API implements API_Interface {
 	 * @return \stdClass
 	 */
 	public function parse_gist_meta( $repo ) {
-		$repo->gist_id = property_exists( $repo, 'gist_id' ) ? $repo->gist_id : $repo->slug;
-		$repo->slug    = property_exists( $repo, 'file' ) ? dirname( $repo->file ) : $repo->slug;
+		$repo->gist_id = is_object( $repo ) && property_exists( $repo, 'gist_id' ) ? $repo->gist_id : $repo->slug;
+		$repo->slug    = is_object( $repo ) && property_exists( $repo, 'file' ) ? dirname( $repo->file ) : $repo->slug;
 
 		return $repo;
 	}
@@ -203,7 +205,7 @@ class Gist_API extends API implements API_Interface {
 	 *
 	 * @param \stdClass|array $response Response from API call.
 	 *
-	 * @return \stdClass|array $arr Array of tag numbers, object is error.
+	 * @return \stdClass|array Array of tag numbers, object is error.
 	 */
 	public function parse_tag_response( $response ) {
 		if ( $this->validate_response( $response ) ) {
@@ -212,8 +214,12 @@ class Gist_API extends API implements API_Interface {
 
 		$arr = [];
 		array_map(
-			function ( $e ) use ( &$arr ) {
-				$arr[] = $e->name;
+				function ( $e ) use ( &$arr ) {
+					if ( ! is_object( $e ) || ! isset( $e->name ) ) {
+						return $arr;
+					}
+
+					$arr[] = $e->name;
 
 				return $arr;
 			},
@@ -228,7 +234,7 @@ class Gist_API extends API implements API_Interface {
 	 *
 	 * @param \stdClass|array $response Response from API call.
 	 *
-	 * @return array $arr Array of meta variables.
+	 * @return array Array of meta variables.
 	 */
 	public function parse_meta_response( $response ) {
 		if ( $this->validate_response( $response ) ) {
@@ -257,7 +263,7 @@ class Gist_API extends API implements API_Interface {
 	 *
 	 * @param \stdClass|array $response Response from API call.
 	 *
-	 * @return array $arr Array of changes in base64.
+	 * @return array Array of changes in base64.
 	 */
 	public function parse_changelog_response( $response ) {
 		if ( $this->validate_response( $response ) ) {
@@ -279,7 +285,7 @@ class Gist_API extends API implements API_Interface {
 	/**
 	 * Parse API response and return array of branch data.
 	 *
-	 * @param \stdClass $response API response.
+	 * @param array|\stdClass $response API response.
 	 *
 	 * @return array Array of branch data.
 	 */
@@ -300,12 +306,12 @@ class Gist_API extends API implements API_Interface {
 	/**
 	 * Parse tags and create download links.
 	 *
-	 * @param \stdClass|array $response  Response from API call.
-	 * @param array           $repo_type Array of repo data.
+	 * @param \stdClass|array $_response  Unused response from API call.
+	 * @param array           $_repo_type Unused array of repo data.
 	 *
 	 * @return array
 	 */
-	protected function parse_tags( $response, $repo_type ) {
+	protected function parse_tags( $_response, $_repo_type ) {
 		return [];
 	}
 
@@ -392,9 +398,10 @@ class Gist_API extends API implements API_Interface {
 		$remote                                 = $this->get_remote_gist_install( $headers );
 		self::$method                           = 'download_link';
 		$download_link_base                     = $this->get_api_url( '/:owner/:gist_id/archive/', true );
-		$endpoint                               = "{$remote->meta['current_hash']}.zip";
+		$remote_meta                            = is_object( $remote ) && property_exists( $remote, 'meta' ) && is_array( $remote->meta ) ? $remote->meta : [];
+		$endpoint                               = isset( $remote_meta['current_hash'] ) ? "{$remote_meta['current_hash']}.zip" : '';
 		$install['download_link']               = $download_link_base . $endpoint;
-		$install['github_updater_install_repo'] = property_exists( $remote, 'slug' ) ? $remote->slug : $install['github_updater_install_repo'];
+		$install['github_updater_install_repo'] = is_object( $remote ) && property_exists( $remote, 'slug' ) ? $remote->slug : $install['github_updater_install_repo'];
 
 		return $install;
 	}
@@ -404,7 +411,7 @@ class Gist_API extends API implements API_Interface {
 	 *
 	 * @param array $headers Array of headers.
 	 *
-	 * @return array $remote
+	 * @return array
 	 */
 	private function get_remote_gist_install( $headers ) {
 		$remote              = new \stdClass();
@@ -419,9 +426,13 @@ class Gist_API extends API implements API_Interface {
 
 		$response         = $this->api( '/gists/:gist_id' );
 		$remote->meta     = $this->parse_meta_response( $response );
-		$remote->is_theme = property_exists( $response->files, 'style.css' );
+		$response_files   = isset( $response->files ) && is_object( $response->files ) ? $response->files : new \stdClass();
+		$remote->is_theme = property_exists( $response_files, 'style.css' );
 		$type             = $remote->is_theme ? 'theme' : 'plugin';
-		foreach ( $response->files as $file ) {
+		foreach ( $response_files as $file ) {
+			if ( ! is_object( $file ) || ! isset( $file->content, $file->filename ) ) {
+				continue;
+			}
 			$file_headers = $this->get_file_headers( $file->content, $type );
 			if ( ! empty( $file_headers ) && ! $remote->is_theme ) {
 				$remote->slug = pathinfo( $file->filename )['filename'];

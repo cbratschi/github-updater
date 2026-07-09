@@ -37,7 +37,7 @@ class GitLab_API extends API implements API_Interface {
 	public function __construct( $type ) {
 		parent::__construct();
 		$this->type     = $type;
-		$this->response = $this->get_repo_cache();
+		$this->response = (array) $this->get_repo_cache();
 		$branch         = new Branch( $this->response );
 		if ( ! empty( $type->branch ) ) {
 			$this->type->branch = ! empty( $branch->cache['current_branch'] )
@@ -176,11 +176,11 @@ class GitLab_API extends API implements API_Interface {
 	}
 
 	/**
-	 * Construct $this->type->download_link using GitLab API v4.
+	 * Construct download link using GitLab API v4.
 	 *
 	 * @param boolean $branch_switch for direct branch changing.
 	 *
-	 * @return string $endpoint
+	 * @return string
 	 */
 	public function construct_download_link( $branch_switch = false ) {
 		self::$method       = 'download_link';
@@ -215,7 +215,7 @@ class GitLab_API extends API implements API_Interface {
 		 * @since 8.8.0
 		 *
 		 * @param string    $download_link Download URL.
-		 * @param /stdClass $this->type    Repository object.
+		 * @param \stdClass $type    Repository object.
 		 * @param string    $branch_switch Branch or tag for rollback or branch switching.
 		 */
 		return apply_filters( 'github_updater_post_construct_download_link', $download_link, $this->type, $branch_switch );
@@ -227,7 +227,7 @@ class GitLab_API extends API implements API_Interface {
 	 * @param GitLab_API|API $git      Git host specific API object.
 	 * @param string         $endpoint Endpoint.
 	 *
-	 * @return string $endpoint
+	 * @return string
 	 */
 	public function add_endpoints( $git, $endpoint ) {
 		switch ( $git::$method ) {
@@ -312,8 +312,12 @@ class GitLab_API extends API implements API_Interface {
 
 		$arr = [];
 		array_map(
-			function ( $e ) use ( &$arr ) {
-				$arr[] = $e->name;
+				function ( $e ) use ( &$arr ) {
+					if ( ! is_object( $e ) || ! isset( $e->name ) ) {
+						return $arr;
+					}
+
+					$arr[] = $e->name;
 
 				return $arr;
 			},
@@ -328,7 +332,7 @@ class GitLab_API extends API implements API_Interface {
 	 *
 	 * @param \stdClass|array $response Response from API call.
 	 *
-	 * @return array $arr Array of meta variables.
+	 * @return array Array of meta variables.
 	 */
 	public function parse_meta_response( $response ) {
 		if ( $this->validate_response( $response ) ) {
@@ -357,7 +361,7 @@ class GitLab_API extends API implements API_Interface {
 	 *
 	 * @param \stdClass|array $response Response from API call.
 	 *
-	 * @return array|\stdClass $arr Array of changes in base64, object if error.
+	 * @return array|\stdClass Array of changes in base64, object if error.
 	 */
 	public function parse_changelog_response( $response ) {
 		if ( $this->validate_response( $response ) ) {
@@ -380,7 +384,7 @@ class GitLab_API extends API implements API_Interface {
 	/**
 	 * Parse API response and return array of branch data.
 	 *
-	 * @param \stdClass $response API response.
+	 * @param array|\stdClass $response API response.
 	 *
 	 * @return array Array of branch data.
 	 */
@@ -390,9 +394,13 @@ class GitLab_API extends API implements API_Interface {
 		}
 		$branches = [];
 		foreach ( $response as $branch ) {
+			if ( ! is_object( $branch ) || ! isset( $branch->name, $branch->commit ) || ! is_object( $branch->commit ) ) {
+				continue;
+			}
+
 			$branches[ $branch->name ]['download']         = $this->construct_download_link( $branch->name );
-			$branches[ $branch->name ]['commit_hash']      = $branch->commit->id;
-			$branches[ $branch->name ]['commit_timestamp'] = $branch->commit->committed_date;
+			$branches[ $branch->name ]['commit_hash']      = isset( $branch->commit->id ) ? $branch->commit->id : null;
+			$branches[ $branch->name ]['commit_timestamp'] = isset( $branch->commit->committed_date ) ? $branch->commit->committed_date : null;
 		}
 
 		return $branches;
@@ -402,11 +410,11 @@ class GitLab_API extends API implements API_Interface {
 	 * Parse tags and create download links.
 	 *
 	 * @param \stdClass|array $response  Response from API call.
-	 * @param array           $repo_type Array of repo data.
+	 * @param array           $_repo_type Unused array of repo data.
 	 *
 	 * @return array
 	 */
-	protected function parse_tags( $response, $repo_type ) {
+	protected function parse_tags( $response, $_repo_type ) {
 		$tags     = [];
 		$rollback = [];
 
@@ -562,7 +570,7 @@ class GitLab_API extends API implements API_Interface {
 			|| ( empty( static::$options['gitlab_access_token'] )
 				&& $auth_required['gitlab'] ) )
 		) {
-			self::$error_code['gitlab'] = [
+			static::$error_code['gitlab'] = [
 				'git'   => 'gitlab',
 				'error' => true,
 			];
@@ -585,11 +593,10 @@ class GitLab_API extends API implements API_Interface {
 	 * @param array $headers Array of headers.
 	 * @param array $install Array of install data.
 	 *
-	 * @return mixed $install
+	 * @return mixed
 	 */
 	public function remote_install( $headers, $install ) {
-		$gitlab_com                     = true;
-		$options['gitlab_access_token'] = isset( static::$options['gitlab_access_token'] ) ? static::$options['gitlab_access_token'] : null;
+		$gitlab_com = true;
 
 		if ( 'gitlab.com' === $headers['host'] || empty( $headers['host'] ) ) {
 			$base            = 'https://gitlab.com';
@@ -612,12 +619,6 @@ class GitLab_API extends API implements API_Interface {
 				$install['options']['gitlab_access_token'] = $install['gitlab_access_token'];
 			}
 		}
-		if ( $gitlab_com ) {
-			$token = ! empty( $install['options']['gitlab_access_token'] )
-				? $install['options']['gitlab_access_token']
-				: $options['gitlab_access_token'];
-		}
-
 		if ( ! empty( static::$options['gitlab_access_token'] ) ) {
 			unset( $install['options']['gitlab_access_token'] );
 		}

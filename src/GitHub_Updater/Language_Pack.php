@@ -28,44 +28,45 @@ class Language_Pack {
     use GHU_Trait;
 
     /**
-     * Variable containing the plugin/theme object.
+     * Language pack URI from the plugin/theme config.
      *
-     * @var Plugin|Theme
+     * @var string|null
      */
-    protected $repo;
+    private $languages = null;
 
     /**
      * Variable containing the Language_Pack_API.
      *
-     * @var Language_Pack_API
+     * @var Language_Pack_API|null
      */
-    private $repo_api;
+    private $repo_api = null;
 
     /**
      * Language_Pack constructor.
      *
-     * @param Plugin|Theme      $repo Plugin/Theme object.
+     * @param \stdClass         $repo Plugin/theme config data.
      * @param Language_Pack_API $api  Language_Pack_API object.
      */
     public function __construct( $repo, Language_Pack_API $api ) {
-        //cbxx FIXME Undefined property '$languages'
-        if ( null === $repo->languages ) {
+        $repo_vars = (array) $repo;
+
+        if ( empty( $repo_vars['languages'] ) ) {
             return;
         }
 
-        $this->repo     = $repo;
-        $this->repo_api = $api;
+        $this->languages = $repo_vars['languages'];
+        $this->repo_api  = $api;
     }
 
     /**
      * Do the Language Pack integration.
      */
     public function run() {
-        if ( null === $this->repo ) {
+        if ( null === $this->languages || null === $this->repo_api ) {
             return false;
         }
 
-        $headers = $this->parse_header_uri( $this->repo->languages );
+        $headers = $this->parse_header_uri( $this->languages );
         $this->repo_api->get_language_pack( $headers );
 
         add_filter( 'site_transient_update_plugins', [ $this, 'update_site_transient' ] );
@@ -84,7 +85,7 @@ class Language_Pack {
         $locales = ! empty( $locales ) ? $locales : [ get_locale() ];
         $repos   = [];
 
-        if ( ! isset( $transient->translations ) ) {
+        if ( ! is_object( $transient ) || ! isset( $transient->translations ) || ! is_array( $transient->translations ) ) {
             return $transient;
         }
 

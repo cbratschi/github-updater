@@ -248,7 +248,7 @@ class CLI_Integration extends WP_CLI_Command {
      * @param string $uri        URI to process.
      * @param array  $assoc_args Args to process.
      *
-     * @return array $cli_config
+     * @return array
      */
     private function process_args( $uri, $assoc_args ) {
         $token                 = isset( $assoc_args['token'] ) ? $assoc_args['token'] : false;
@@ -323,7 +323,7 @@ class CLI_Plugin_Installer_Skin extends \Plugin_Installer_Skin {
      * @return void
      */
     public function error( $errors ) {
-        if ( is_wp_error( $errors ) ) {
+        if ( is_wp_error( $errors ) && $errors instanceof \WP_Error ) {
             WP_CLI::error( $errors->get_error_message() . "\n" . $errors->get_error_data() );
         }
     }
@@ -331,12 +331,12 @@ class CLI_Plugin_Installer_Skin extends \Plugin_Installer_Skin {
     /**
      * Skin feedback.
      *
-     * @param string $string  Feedback message.
-     * @param array  ...$args Feedback args.
+     * @param string $_string  Unused feedback message.
+     * @param array  ...$_args Unused feedback args.
      *
      * @return void
      */
-    public function feedback( $string, ...$args ) {
+    public function feedback( $_string, ...$_args ) {
     }
 }
 
@@ -361,7 +361,7 @@ class CLI_Theme_Installer_Skin extends \Theme_Installer_Skin {
      * @return void
      */
     public function error( $errors ) {
-        if ( is_wp_error( $errors ) ) {
+        if ( is_wp_error( $errors ) && $errors instanceof \WP_Error ) {
             WP_CLI::error( $errors->get_error_message() . "\n" . $errors->get_error_data() );
         }
     }
@@ -369,11 +369,11 @@ class CLI_Theme_Installer_Skin extends \Theme_Installer_Skin {
     /**
      * Skin feedback.
      *
-     * @param string $string  Feedback message.
-     * @param array  ...$args Feedback args.
+     * @param string $_string  Unused feedback message.
+     * @param array  ...$_args Unused feedback args.
      *
      * @return void
      */
-    public function feedback( $string, ...$args ) {
+    public function feedback( $_string, ...$_args ) {
     }
 }
