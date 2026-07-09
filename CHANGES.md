@@ -1,5 +1,9 @@
 #### [unreleased]
 
+#### 9.9.31 / 2026-07-09
+
+* fixed editor type warnings and PHPDoc annotations
+
 #### 9.9.30 / 2026-07-09
 
 * fixed Bitbucket authentication lookup for single theme updates
