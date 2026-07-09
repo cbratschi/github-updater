@@ -1,5 +1,9 @@
 #### [unreleased]
 
+#### 9.9.34 / 2026-07-09
+
+* fixed Bitbucket raw access tokens to use bearer authentication for package downloads
+
 #### 9.9.33 / 2026-07-09
 
 * fixed authenticated Bitbucket Cloud package downloads timing out during updates

@@ -102,19 +102,10 @@ trait Basic_Auth_Loader {
             }
 
             if ( 'bitbucket' === $credentials['type'] ) {
-                // Bitbucket basic auth (see https://developer.atlassian.com/server/bitbucket/how-tos/example-basic-authentication/).
                 $token = $credentials['token'];
 
                 if ( false === strpos( $token, ':' ) ) {
-                    $bitbucket_host = parse_url( $url, PHP_URL_HOST );
-
-                    if ( 'api.bitbucket.org' === $bitbucket_host ) {
-                        $args['headers']['Authorization'] = 'Bearer ' . $token;
-                    } else {
-                        // Repository/workspace/project access tokens use x-token-auth for Git-style downloads.
-                        // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
-                        $args['headers']['Authorization'] = 'Basic ' . base64_encode( 'x-token-auth:' . $token );
-                    }
+                    $args['headers']['Authorization'] = 'Bearer ' . $token;
                 } else {
                     // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
                     $args['headers']['Authorization'] = 'Basic ' . base64_encode( $token );
