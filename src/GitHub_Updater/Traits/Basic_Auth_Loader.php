@@ -39,6 +39,13 @@ trait Basic_Auth_Loader {
     private static $basic_auth_required = [ 'Bitbucket', 'GitHub', 'GitLab', 'Gitea' ];
 
     /**
+     * Stores Bitbucket Cloud archive redirects for diagnostics.
+     *
+     * @var array
+     */
+    private $bitbucket_cloud_archive_redirects = [];
+
+    /**
      * Pre-download packages that need special handling.
      *
      * @param bool|\WP_Error|string $reply      Default false, or a pre-existing result.
@@ -411,6 +418,9 @@ trait Basic_Auth_Loader {
 
         $auth_method = $this->get_bitbucket_cloud_archive_auth_method( $credentials['token'] );
         $redirection = 20;
+        $this->bitbucket_cloud_archive_redirects = [];
+
+        add_action( 'requests-requests.before_redirect', [ $this, 'record_bitbucket_cloud_archive_redirect' ], 10, 1 );
         $response = wp_remote_get(
             $package,
             [
@@ -421,11 +431,13 @@ trait Basic_Auth_Loader {
                 'headers'     => $this->get_bitbucket_cloud_archive_headers( $credentials['token'] ),
             ]
         );
+        remove_action( 'requests-requests.before_redirect', [ $this, 'record_bitbucket_cloud_archive_redirect' ], 10 );
 
         if ( is_wp_error( $response ) ) {
             $response->add_data(
                 [
                     'auth_method'       => $auth_method,
+                    'redirect_chain'    => $this->bitbucket_cloud_archive_redirects,
                     'redirection_limit' => $redirection,
                 ],
                 $response->get_error_code()
@@ -443,6 +455,7 @@ trait Basic_Auth_Loader {
                 'content_type'      => $this->get_bitbucket_cloud_archive_response_header( $response, 'content-type' ),
                 'location'          => $this->get_bitbucket_cloud_archive_response_header( $response, 'location' ),
                 'body'              => $this->get_bitbucket_cloud_archive_error_body( $response, $zip_file ),
+                'redirect_chain'    => $this->bitbucket_cloud_archive_redirects,
                 'redirection_limit' => $redirection,
             ];
             $this->delete_file( $zip_file );
@@ -459,6 +472,42 @@ trait Basic_Auth_Loader {
         }
 
         return $zip_file;
+    }
+
+    /**
+     * Record a Bitbucket Cloud archive redirect location for diagnostics.
+     *
+     * @param string $location Redirect URL.
+     *
+     * @return void
+     */
+    public function record_bitbucket_cloud_archive_redirect( $location ) {
+        if ( count( $this->bitbucket_cloud_archive_redirects ) >= 25 ) {
+            return;
+        }
+
+        $this->bitbucket_cloud_archive_redirects[] = $this->redact_bitbucket_cloud_archive_redirect( $location );
+    }
+
+    /**
+     * Redact a redirect URL for diagnostics.
+     *
+     * @param string $location Redirect URL.
+     *
+     * @return string
+     */
+    private function redact_bitbucket_cloud_archive_redirect( $location ) {
+        $parts = parse_url( $location );
+
+        if ( ! is_array( $parts ) || empty( $parts['host'] ) ) {
+            return is_scalar( $location ) ? (string) $location : '';
+        }
+
+        $scheme = isset( $parts['scheme'] ) ? $parts['scheme'] . '://' : '';
+        $path   = isset( $parts['path'] ) ? $parts['path'] : '';
+        $query  = ! empty( $parts['query'] ) ? '?...' : '';
+
+        return $scheme . $parts['host'] . $path . $query;
     }
 
     /**

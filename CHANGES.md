@@ -1,5 +1,9 @@
 #### [unreleased]
 
+#### 9.9.39 / 2026-07-10
+
+* added redacted Bitbucket Cloud archive redirect-chain diagnostics
+
 #### 9.9.38 / 2026-07-09
 
 * increased Bitbucket Cloud archive redirect limit for direct downloads
