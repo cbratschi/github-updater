@@ -1,5 +1,10 @@
 #### [unreleased]
 
+#### 9.9.32 / 2026-07-09
+
+* fixed authenticated Bitbucket Cloud package downloads for private updates
+* fixed Bitbucket rollback package URLs
+
 #### 9.9.31 / 2026-07-09
 
 * fixed editor type warnings and PHPDoc annotations
