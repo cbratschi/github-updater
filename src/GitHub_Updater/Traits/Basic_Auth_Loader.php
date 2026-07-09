@@ -410,11 +410,12 @@ trait Basic_Auth_Loader {
         }
 
         $auth_method = $this->get_bitbucket_cloud_archive_auth_method( $credentials['token'] );
+        $redirection = 20;
         $response = wp_remote_get(
             $package,
             [
                 'timeout'     => 300,
-                'redirection' => 5,
+                'redirection' => $redirection,
                 'stream'      => true,
                 'filename'    => $zip_file,
                 'headers'     => $this->get_bitbucket_cloud_archive_headers( $credentials['token'] ),
@@ -424,7 +425,8 @@ trait Basic_Auth_Loader {
         if ( is_wp_error( $response ) ) {
             $response->add_data(
                 [
-                    'auth_method' => $auth_method,
+                    'auth_method'       => $auth_method,
+                    'redirection_limit' => $redirection,
                 ],
                 $response->get_error_code()
             );
@@ -436,11 +438,12 @@ trait Basic_Auth_Loader {
         $code = (int) wp_remote_retrieve_response_code( $response );
         if ( 200 !== $code ) {
             $error_data = [
-                'auth_method'  => $auth_method,
-                'status'       => $code,
-                'content_type' => $this->get_bitbucket_cloud_archive_response_header( $response, 'content-type' ),
-                'location'     => $this->get_bitbucket_cloud_archive_response_header( $response, 'location' ),
-                'body'         => $this->get_bitbucket_cloud_archive_error_body( $response, $zip_file ),
+                'auth_method'       => $auth_method,
+                'status'            => $code,
+                'content_type'      => $this->get_bitbucket_cloud_archive_response_header( $response, 'content-type' ),
+                'location'          => $this->get_bitbucket_cloud_archive_response_header( $response, 'location' ),
+                'body'              => $this->get_bitbucket_cloud_archive_error_body( $response, $zip_file ),
+                'redirection_limit' => $redirection,
             ];
             $this->delete_file( $zip_file );
 

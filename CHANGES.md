@@ -1,5 +1,9 @@
 #### [unreleased]
 
+#### 9.9.38 / 2026-07-09
+
+* increased Bitbucket Cloud archive redirect limit for direct downloads
+
 #### 9.9.37 / 2026-07-09
 
 * added diagnostics for slow Bitbucket Cloud archive fallback downloads
