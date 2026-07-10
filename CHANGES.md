@@ -1,5 +1,9 @@
 #### [unreleased]
 
+#### 9.9.40 / 2026-07-10
+
+* clarified that private Bitbucket Cloud archives require user-scoped credentials and do not support repository, workspace, or project access tokens
+
 #### 9.9.39 / 2026-07-10
 
 * added redacted Bitbucket Cloud archive redirect-chain diagnostics

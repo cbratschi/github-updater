@@ -56,7 +56,9 @@ class CLI_Integration extends WP_CLI_Command {
      *
      * [--token=<access_token>]
      * : GitHub, Bitbucket, GitLab, or Gitea access token if not already saved
-     * Bitbucket Cloud API token in format `email:api_token`, or raw repository/workspace/project access token
+     * For Bitbucket Cloud, use a user-scoped Atlassian API token as `email:api_token`
+     * or Bitbucket user account credentials as `username:password`.
+     * Repository, workspace, and project access tokens are not supported.
      *
      * [--slug=<slug>]
      * : Optional string indicating the plugin slug
@@ -127,7 +129,9 @@ class CLI_Integration extends WP_CLI_Command {
      *
      * [--token=<access_token>]
      * : GitHub, Bitbucket, GitLab, or Gitea access token if not already saved
-     * Bitbucket Cloud API token in format `email:api_token`, or raw repository/workspace/project access token
+     * For Bitbucket Cloud, use a user-scoped Atlassian API token as `email:api_token`
+     * or Bitbucket user account credentials as `username:password`.
+     * Repository, workspace, and project access tokens are not supported.
      *
      * [--slug=<slug>]
      * : Optional string indicating the theme slug

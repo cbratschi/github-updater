@@ -498,14 +498,14 @@ class Bitbucket_API extends API implements API_Interface {
      * Print the Bitbucket repo Settings text.
      */
     public function print_section_bitbucket_info() {
-        esc_html_e( 'Enter an Atlassian API token as `email:api_token`, or enter a raw Bitbucket repository/workspace/project access token.', 'github-updater' );
+        esc_html_e( 'Enter a user-scoped Atlassian API token as `email:api_token`, or Bitbucket user account credentials as `username:password`. Repository, workspace, and project access tokens are not supported.', 'github-updater' );
     }
 
     /**
      * Print the Bitbucket user/pass Settings text.
      */
     public function print_section_bitbucket_token() {
-        esc_html_e( 'Enter an Atlassian API token as `email:api_token`, or enter a raw Bitbucket repository/workspace/project access token. Bitbucket app passwords are deprecated.', 'github-updater' );
+        esc_html_e( 'Enter a user-scoped Atlassian API token as `email:api_token`, or Bitbucket user account credentials as `username:password`. Repository, workspace, and project access tokens are not supported. Bitbucket app passwords are deprecated.', 'github-updater' );
 
         //Bitbucket logo (FIXME missing CSS)
         //$icon = plugin_dir_url( dirname( __DIR__ ) ) . '../assets/bitbucket-logo.svg';
@@ -587,7 +587,7 @@ class Bitbucket_API extends API implements API_Interface {
             <input class="bitbucket_setting" type="text" style="width:50%;" id="bitbucket_access_token" name="bitbucket_access_token" value="">
             <br>
             <span class="description">
-                <?php esc_html_e( 'Enter an Atlassian API token as email:api_token, or a raw Bitbucket repository/workspace/project access token.', 'github-updater' ); ?>
+                <?php esc_html_e( 'Enter a user-scoped Atlassian API token as email:api_token, or Bitbucket user account credentials as username:password. Repository, workspace, and project access tokens are not supported.', 'github-updater' ); ?>
             </span>
         </label>
         <?php
